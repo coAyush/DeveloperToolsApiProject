@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+@layer utilities {
+  .animate-fade-in-up {
+    @apply opacity-0 animate-[fadeInUp_0.55s_ease-in-out_forwards];
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
