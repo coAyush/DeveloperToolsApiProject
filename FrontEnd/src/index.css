@@ -1,8 +1,22 @@
 @import "tailwindcss";
 
+/* Custom Animations */
 @layer utilities {
+  .animate-fade-in {
+    @apply opacity-0 animate-[fadeIn_0.3s_ease-in-out_forwards];
+  }
+
   .animate-fade-in-up {
-    @apply opacity-0 animate-[fadeInUp_0.55s_ease-in-out_forwards];
+    @apply opacity-0 animate-[fadeInUp_0.5s_ease-in-out_forwards];
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
