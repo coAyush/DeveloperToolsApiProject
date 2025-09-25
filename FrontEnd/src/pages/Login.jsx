@@ -1,7 +1,26 @@
+import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom"; // navigation hook
+
 const Login = () => {
+  const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate(); // hook init
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    // Backend auth call hobe 
+    // Dummy success
+    toast.success("Logged in successfully!");
+
+    // Redirect to /home after 1s
+    setTimeout(() => {
+      navigate("/home");
+    }, 1000);
+  };
+
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4">
-      {/* Card with top margin */}
       <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg animate-fade-in-up mt-20">
         
         {/* Heading */}
@@ -13,7 +32,7 @@ const Login = () => {
         </p>
 
         {/* Form */}
-        <form className="space-y-5">
+        <form className="space-y-5" onSubmit={handleLogin}>
           {/* Email */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
@@ -25,21 +44,32 @@ const Login = () => {
               className="w-full mt-1 p-3 border border-gray-300 rounded-lg 
                          bg-gray-50 text-gray-800 placeholder-gray-400
                          focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              required
             />
           </div>
 
-          {/* Password */}
+          {/* Password with eye toggle */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Password
             </label>
-            <input
-              type="password"
-              placeholder="Enter your password"
-              className="w-full mt-1 p-3 border border-gray-300 rounded-lg 
-                         bg-gray-50 text-gray-800 placeholder-gray-400
-                         focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter your password"
+                className="w-full mt-1 p-3 border border-gray-300 rounded-lg 
+                           bg-gray-50 text-gray-800 placeholder-gray-400
+                           focus:outline-none focus:ring-2 focus:ring-blue-500 transition pr-10"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
             <div className="text-right mt-2">
               <a href="#" className="text-sm text-blue-600 hover:underline">
                 Forgot password?
@@ -58,7 +88,7 @@ const Login = () => {
           </button>
         </form>
 
-        {/* Extra link -> SignUp page  */}
+        {/* Extra link -> SignUp page */}
         <p className="mt-6 text-center text-sm text-gray-600">
           Don’t have an account?{" "}
           <a href="/signup" className="text-blue-600 hover:underline">
