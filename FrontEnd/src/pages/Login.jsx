@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom"; // navigation hook
@@ -7,9 +7,21 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate(); // hook init
 
+  // Pressing Esc key will go back to previous page
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        navigate(-1); // go back
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [navigate]);
+
   const handleLogin = (e) => {
     e.preventDefault();
-    // Backend auth call hobe 
+    // Backend auth call hobe
     // Dummy success
     toast.success("Logged in successfully!");
 
@@ -22,7 +34,6 @@ const Login = () => {
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4">
       <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg animate-fade-in-up mt-20">
-        
         {/* Heading */}
         <h2 className="text-3xl md:text-4xl font-bold mb-6 text-center text-blue-600">
           Welcome Back
