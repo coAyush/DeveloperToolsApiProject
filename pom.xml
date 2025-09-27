@@ -8,19 +8,18 @@
     <artifactId>DeveloperToolsApiProject</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>war</packaging>
-    <name>DeveloperToolsApiProject-1.0-SNAPSHOT</name>
+    <name>DeveloperToolsApiProject</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <java.version>21</java.version>
         <spring.version>6.1.10</spring.version>
         <maven.compiler.plugin.version>3.12.1</maven.compiler.plugin.version>
         <maven.war.plugin.version>3.4.0</maven.war.plugin.version>
     </properties>
 
     <dependencies>
-        <!-- Servlet API (provided by container like Tomcat/Jetty) -->
+        <!-- Servlet API (provided by Tomcat/Jetty container) -->
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
@@ -28,7 +27,7 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Spring MVC -->
+        <!-- Spring MVC & Context -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
@@ -45,7 +44,7 @@
             <version>${spring.version}</version>
         </dependency>
 
-        <!-- JSON (needed for @RestController responses) -->
+        <!-- JSON (Jackson for @RestController) -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
@@ -71,7 +70,7 @@
             <version>9.0.0</version>
         </dependency>
 
-        <!-- Testing (JUnit + Spring Test) -->
+        <!-- Testing -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
@@ -84,23 +83,27 @@
             <version>5.10.2</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- Optional JAX-RS API -->
         <dependency>
             <groupId>jakarta.ws.rs</groupId>
             <artifactId>jakarta.ws.rs-api</artifactId>
             <version>3.1.0</version>
-            <type>jar</type>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <!-- Java 21 -->
+            <!-- Compiler Plugin with -parameters -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven.compiler.plugin.version}</version>
                 <configuration>
-                    <release>21</release>
+                    <release>${java.version}</release>
+                    <compilerArgs>
+                        <arg>-parameters</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
 
@@ -112,6 +115,13 @@
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                 </configuration>
+            </plugin>
+
+            <!-- Surefire for JUnit 5 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
             </plugin>
         </plugins>
     </build>
