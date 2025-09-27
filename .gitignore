@@ -43,3 +43,5 @@ nbdist/
 .project
 .classpath
 .settings/
+# build outputs
+/target/
