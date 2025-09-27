@@ -178,7 +178,7 @@ const UrlShortener = () => {
               >
                 <Copy size={18} />
               </button>
-              <a
+              {/* <a
                 href={result.shortUrl}
                 target="_blank"
                 rel="noreferrer"
@@ -186,7 +186,7 @@ const UrlShortener = () => {
                 title="Open"
               >
                 <ExternalLink size={18} />
-              </a>
+              </a> */}
             </div>
 
             {result.code && (
