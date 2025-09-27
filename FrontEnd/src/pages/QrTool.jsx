@@ -16,24 +16,22 @@ const QrTool = () => {
 
     try {
       const res = await axios.post(
-        "http://localhost:8080/DeveloperToolsApiProject/api/qr", // ✅ use correct context path
+        "http://localhost:8080/DeveloperToolsApiProject/api/qr",
         formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
+        { headers: { "Content-Type": "multipart/form-data" } }
       );
 
       console.log("QR Response:", res.data);
 
-      // If backend returns Base64 string → show image
+      // ✅ backend already returns full dataURL → just use directly
       if (res.data.qrImageBase64) {
-        setQrPreview(`data:image/png;base64,${res.data.qrImageBase64}`);
+        setQrPreview(res.data.qrImageBase64);
       } else {
-        alert("No QR returned from server");
+        alert("No QR returned from server.");
       }
     } catch (err) {
       console.error("Error generating QR:", err);
-      alert("Failed to generate QR. Check console.");
+      alert("Failed to generate QR. Check backend logs.");
     }
   };
 
