@@ -1,4 +1,6 @@
+# ===============================================================
 # General logs and temporary files
+# ===============================================================
 *.log
 *.tmp
 
@@ -9,9 +11,10 @@ Thumbs.db
 # ===============================================================
 # Backend (Java / Maven)
 # ===============================================================
-
 # Build output and compiled classes
 target/
+*.class
+*.war
 
 # Maven release plugin files
 pom.xml.tag
@@ -23,12 +26,11 @@ dependency-reduced-pom.xml
 # ===============================================================
 # IDE and Editor Configuration
 # ===============================================================
-
 # IntelliJ
 .idea/
 *.iml
 
-# NetBeans (as seen in your screenshot)
+# NetBeans
 nb-configuration.xml
 *.nbproject/
 build/
@@ -43,5 +45,8 @@ nbdist/
 .project
 .classpath
 .settings/
-# build outputs
-/target/
+
+# ===============================================================
+# Frontend
+# ===============================================================
+FrontEnd/node_modules/
