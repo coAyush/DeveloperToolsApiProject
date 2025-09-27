@@ -1,4 +1,5 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Download, QrCode } from "lucide-react";
 import axios from "axios";
 
@@ -7,6 +8,18 @@ const QrTool = () => {
   const [file, setFile] = useState(null);
   const [qrPreview, setQrPreview] = useState(null); // ✅ store backend QR
   const fileInputRef = useRef(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        navigate(-1); // go back to previous page
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [navigate]);
 
   // ✅ Generate QR from backend
   const handleGenerate = async () => {
@@ -70,7 +83,10 @@ const QrTool = () => {
           className="flex flex-col items-center justify-center border border-dashed border-gray-400 rounded-lg p-8 bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
           onClick={handleFileClick}
         >
-          <QrCode size={90} className="text-blue-500 mb-3 hover:scale-110 transition-transform" />
+          <QrCode
+            size={90}
+            className="text-blue-500 mb-3 hover:scale-110 transition-transform"
+          />
           <p className="text-gray-500 text-sm text-center">
             {file ? `Uploaded: ${file.name}` : "Click QR to upload a file"}
           </p>
