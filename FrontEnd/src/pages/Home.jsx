@@ -17,23 +17,17 @@ const ToolCard = ({ icon: Icon, title, desc, link }) => (
                hover:shadow-2xl hover:scale-[1.03] transition transform group cursor-pointer overflow-hidden block"
   >
     {/* Gradient Hover Overlay */}
-    <div
-      className="absolute inset-0 bg-gradient-to-r from-blue-500 to-cyan-400 
-                    opacity-0 group-hover:opacity-10 transition"
-    ></div>
+    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-cyan-400 
+                    opacity-0 group-hover:opacity-10 transition"></div>
 
     {/* Icon */}
-    <div
-      className="flex items-center justify-center w-16 h-16 rounded-xl bg-blue-100 mb-6 
-                    group-hover:bg-blue-200 transition relative z-10"
-    >
+    <div className="flex items-center justify-center w-16 h-16 rounded-xl bg-blue-100 mb-6 
+                    group-hover:bg-blue-200 transition relative z-10">
       <Icon size={34} className="text-blue-600" />
     </div>
 
     {/* Content */}
-    <h2 className="text-xl font-bold text-gray-800 mb-3 relative z-10">
-      {title}
-    </h2>
+    <h2 className="text-xl font-bold text-gray-800 mb-3 relative z-10">{title}</h2>
     <p className="text-sm text-gray-600 mb-6 relative z-10">{desc}</p>
 
     {/* Button Style but not actual button */}
@@ -60,10 +54,8 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 via-blue-50 to-gray-100 px-6 py-24 flex flex-col items-center">
       {/* Heading Section */}
-      <h1
-        className="text-4xl md:text-6xl font-extrabold text-center mb-4 
-                     bg-gradient-to-r from-blue-600 to-cyan-400 bg-clip-text text-transparent"
-      >
+      <h1 className="text-4xl md:text-6xl font-extrabold text-center mb-4 
+                     bg-gradient-to-r from-blue-600 to-cyan-400 bg-clip-text text-transparent">
         Welcome to DevToolBox
       </h1>
 
@@ -88,6 +80,12 @@ const Home = () => {
           title="URL Shortener"
           desc="Turn bulky URLs into sleek links. Share anywhere with confidence."
           link="/tools/url"
+        />
+        <ToolCard
+          icon={KeyRound}
+          title="Password Generator"
+          desc="Create strong, secure passwords with a single click. Stay safe online."
+          link="/tools/password"
         />
       </div>
     </div>
