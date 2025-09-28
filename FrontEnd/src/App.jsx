@@ -6,7 +6,10 @@ import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import Home from "./pages/Home";
 import QrTool from "./pages/QrTool";
+import PasswordGen from "./pages/PasswordGen";
 import UrlShortener from "./pages/UrlShortener";
+import Contact from "./pages/Contact";
+import About from "./pages/About";
 
 // Public layout (without Navbar & Footer)
 const PublicLayout = ({ children }) => <>{children}</>;
@@ -60,6 +63,22 @@ const App = () => {
           </PrivateLayout>
         }
       />
+      <Route
+        path="/about"
+        element={
+          <PrivateLayout>
+            <About />
+          </PrivateLayout>
+        }
+      />
+      <Route
+        path="/contact"
+        element={
+          <PrivateLayout>
+            <Contact/>
+          </PrivateLayout>
+        }
+      />
 
       {/* Future Tools  */}
 
@@ -79,7 +98,7 @@ const App = () => {
           </PrivateLayout>
         }
       />
-      {/* <Route path="/tools/password" element={<PrivateLayout><PasswordGen /></PrivateLayout>} /> */}
+      <Route path="/tools/password" element={<PrivateLayout><PasswordGen /></PrivateLayout>} />
     </Routes>
   );
 };
