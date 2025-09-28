@@ -26,7 +26,6 @@ const PasswordGen = () => {
   const handleGenerate = async () => {
     setLoading(true);
     try {
-      // 👇 Backend request format (adjust if needed)
       const { data } = await axios.post(`${API_BASE}/password/generate`, {
         length,
         includeUpper,
@@ -36,13 +35,13 @@ const PasswordGen = () => {
 
       if (data?.password) {
         setPassword(data.password);
-        toast.success("Password generated!");
+        toast.success("Password generated successfully!");
       } else {
         toast.error("No password returned from server.");
       }
     } catch (err) {
       console.error("Error generating password:", err);
-      toast.error("Failed to generate password. Check backend.");
+      toast.error("Failed to generate password. Check backend logs.");
     } finally {
       setLoading(false);
     }
@@ -51,12 +50,24 @@ const PasswordGen = () => {
   const handleCopy = async () => {
     if (!password) return;
     await navigator.clipboard.writeText(password);
-    toast.success("Password copied to clipboard!");
+    toast.success("📋 Password copied to clipboard!");
   };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-cyan-50 px-6 py-20">
-      <Toaster position="top-right" />
+      <Toaster
+        position="top-right"
+        containerStyle={{ top: 80 }} // 
+        toastOptions={{
+          style: {
+            background: "#fff",
+            color: "#333",
+            border: "1px solid #e2e8f0",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            fontSize: "14px",
+          },
+        }}
+      />
 
       {/* Title */}
       <h1 className="text-3xl md:text-5xl font-extrabold text-center bg-gradient-to-r from-blue-600 to-cyan-400 bg-clip-text text-transparent mb-10">
@@ -76,7 +87,7 @@ const PasswordGen = () => {
             max="32"
             value={length}
             onChange={(e) => setLength(Number(e.target.value))}
-            className="w-full"
+            className="w-full accent-blue-500"
           />
         </div>
 
