@@ -1,33 +1,32 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.DevToolBox.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import java.util.concurrent.ConcurrentHashMap;
 
-/**
- *
- * @author USER
- */
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.filter.ForwardedHeaderFilter;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
 @RestController
-@RequestMapping("/api")
 public class UrlShortenerController {
 
-    private final Map<String, String> urlStore = new HashMap<>();
+    // In-memory store (replace with DB for production)
+    private final Map<String, String> urlStore = new ConcurrentHashMap<>();
 
-    @PostMapping("/shorten")
-    public Map<String, Object> shorten(@RequestBody Map<String, String> body) {
+    /**
+     * Create a short link
+     * POST /api/shorten
+     * JSON: { "url": "https://long.url", "alias": "optional-custom-code" }
+     * Returns: { "shortUrl": ".../r/{code}", "code": "{code}" }
+     */
+    @PostMapping("/api/shorten")
+    public Map<String, Object> shorten(@RequestBody Map<String, String> body, HttpServletRequest request) {
         String longUrl = body.get("url");
         String alias = body.get("alias");
 
@@ -35,29 +34,39 @@ public class UrlShortenerController {
             return Map.of("message", "URL is required");
         }
 
-        // If alias provided, check for conflicts
+        // pick alias or generate 6-char code
         String code;
         if (alias != null && !alias.isBlank()) {
             if (urlStore.containsKey(alias)) {
                 return Map.of("message", "Alias already in use");
             }
-            code = alias;
+            code = alias.trim();
         } else {
-            // Generate random short code
-            code = UUID.randomUUID().toString().substring(0, 6);
+            code = UUID.randomUUID().toString().replace("-", "").substring(0, 6);
+            // avoid rare collision
+            while (urlStore.containsKey(code)) {
+                code = UUID.randomUUID().toString().replace("-", "").substring(0, 6);
+            }
         }
 
         urlStore.put(code, longUrl);
 
-        String shortUrl = "http://localhost:8080/DeveloperToolsApiProject/r/" + code;
+        // Build absolute URL from the current context (scheme/host/port/contextPath)
+        // Works locally, on LAN, and behind reverse proxies when ForwardedHeaderFilter is active
+        String shortUrl = ServletUriComponentsBuilder
+                .fromCurrentContextPath()  // e.g. http(s)://host[:port]/<context>
+                .path("/r/{code}")
+                .buildAndExpand(code)
+                .toUriString();
 
-        return Map.of(
-                "shortUrl", shortUrl,
-                "code", code
-        );
+        return Map.of("shortUrl", shortUrl, "code", code);
     }
 
-    // Redirect endpoint: GET /r/{code}
+    /**
+     * Resolve the short link
+     * GET /r/{code}
+     * Redirects to the original long URL
+     */
     @GetMapping("/r/{code}")
     public void redirect(@PathVariable String code, HttpServletResponse response) throws IOException {
         String longUrl = urlStore.get(code);
@@ -66,5 +75,24 @@ public class UrlShortenerController {
         } else {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "URL not found");
         }
+    }
+
+    // --- Optional utility endpoints for testing ---
+
+    @GetMapping("/api/_debug/{code}")
+    public Map<String, String> debug(@PathVariable String code) {
+        return Map.of("code", code, "longUrl", urlStore.getOrDefault(code, "<missing>"));
+    }
+}
+
+/**
+ * Ensures Spring respects X-Forwarded-Proto/Host/etc. when behind a reverse proxy
+ * so generated URLs have the correct public scheme/host/port.
+ */
+@Configuration
+class ForwardedHeadersConfig {
+    @Bean
+    public ForwardedHeaderFilter forwardedHeaderFilter() {
+        return new ForwardedHeaderFilter();
     }
 }
