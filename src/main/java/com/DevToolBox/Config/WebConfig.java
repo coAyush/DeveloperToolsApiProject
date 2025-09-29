@@ -6,7 +6,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 @Configuration
 @EnableWebMvc
-@ComponentScan(basePackages = "com.DevToolBox.controller")
+@ComponentScan(basePackages = "com.DevToolBox")
 public class WebConfig implements WebMvcConfigurer {
 
     @Bean

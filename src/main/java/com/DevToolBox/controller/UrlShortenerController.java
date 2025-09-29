@@ -1,98 +1,95 @@
 package com.DevToolBox.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.filter.ForwardedHeaderFilter;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 public class UrlShortenerController {
 
-    // In-memory store (replace with DB for production)
-    private final Map<String, String> urlStore = new ConcurrentHashMap<>();
+    private final Cloudinary cloudinary;
 
-    /**
-     * Create a short link
-     * POST /api/shorten
-     * JSON: { "url": "https://long.url", "alias": "optional-custom-code" }
-     * Returns: { "shortUrl": ".../r/{code}", "code": "{code}" }
-     */
-    @PostMapping("/api/shorten")
-    public Map<String, Object> shorten(@RequestBody Map<String, String> body, HttpServletRequest request) {
-        String longUrl = body.get("url");
-        String alias = body.get("alias");
-
-        if (longUrl == null || longUrl.isBlank()) {
-            return Map.of("message", "URL is required");
-        }
-
-        // pick alias or generate 6-char code
-        String code;
-        if (alias != null && !alias.isBlank()) {
-            if (urlStore.containsKey(alias)) {
-                return Map.of("message", "Alias already in use");
-            }
-            code = alias.trim();
-        } else {
-            code = UUID.randomUUID().toString().replace("-", "").substring(0, 6);
-            // avoid rare collision
-            while (urlStore.containsKey(code)) {
-                code = UUID.randomUUID().toString().replace("-", "").substring(0, 6);
-            }
-        }
-
-        urlStore.put(code, longUrl);
-
-        // Build absolute URL from the current context (scheme/host/port/contextPath)
-        // Works locally, on LAN, and behind reverse proxies when ForwardedHeaderFilter is active
-        String shortUrl = ServletUriComponentsBuilder
-                .fromCurrentContextPath()  // e.g. http(s)://host[:port]/<context>
-                .path("/r/{code}")
-                .buildAndExpand(code)
-                .toUriString();
-
-        return Map.of("shortUrl", shortUrl, "code", code);
+    public UrlShortenerController(Cloudinary cloudinary) {
+        this.cloudinary = cloudinary;
     }
 
     /**
-     * Resolve the short link
+     * POST /api/shorten
+     * Body: { "url": "https://long.url", "alias": "optional-custom" }
+     */
+    @PostMapping("/api/shorten")
+    public Map<String, Object> shorten(@RequestBody Map<String, String> body) {
+        String longUrl = body.get("url");
+        String alias   = body.get("alias");
+
+        if (!StringUtils.hasText(longUrl)) {
+            return Map.of("error", "URL is required");
+        }
+
+        // Pick alias or generate random code
+        String code = (StringUtils.hasText(alias) ? alias.trim() : randomCode());
+
+        try {
+            // Encode the mapping into JSON (just the long URL)
+            String json = "{\"longUrl\":\"" + longUrl + "\"}";
+            byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+
+            // Upload to Cloudinary as raw (non-image) resource
+            cloudinary.uploader().upload(
+                    bytes,
+                    ObjectUtils.asMap(
+                            "public_id", "shortlinks/" + code,
+                            "resource_type", "raw",
+                            "overwrite", true
+                    )
+            );
+
+            // Build redirect URL served by *your app*
+            String shortUrl = ServletUriComponentsBuilder
+                    .fromCurrentContextPath()
+                    .path("/r/{code}")
+                    .buildAndExpand(code)
+                    .toUriString();
+
+            return Map.of("shortUrl", shortUrl, "code", code, "longUrl", longUrl);
+        } catch (Exception e) {
+            return Map.of("error", "Cloudinary upload failed: " + e.getMessage());
+        }
+    }
+
+    /**
      * GET /r/{code}
-     * Redirects to the original long URL
+     * Reads mapping from Cloudinary and redirects.
      */
     @GetMapping("/r/{code}")
     public void redirect(@PathVariable String code, HttpServletResponse response) throws IOException {
-        String longUrl = urlStore.get(code);
-        if (longUrl != null) {
+        try {
+            Map result = cloudinary.api().resource("shortlinks/" + code,
+                    ObjectUtils.asMap("resource_type", "raw"));
+
+            // Download content (JSON we stored earlier)
+            String url = (String) result.get("secure_url");
+            String json = new String(new java.net.URL(url).openStream().readAllBytes(), StandardCharsets.UTF_8);
+
+            // Extract longUrl manually (since JSON is tiny)
+            String longUrl = json.replace("{\"longUrl\":\"", "").replace("\"}", "");
+
             response.sendRedirect(longUrl);
-        } else {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, "URL not found");
+        } catch (Exception e) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Short link not found");
         }
     }
 
-    // --- Optional utility endpoints for testing ---
-
-    @GetMapping("/api/_debug/{code}")
-    public Map<String, String> debug(@PathVariable String code) {
-        return Map.of("code", code, "longUrl", urlStore.getOrDefault(code, "<missing>"));
-    }
-}
-
-/**
- * Ensures Spring respects X-Forwarded-Proto/Host/etc. when behind a reverse proxy
- * so generated URLs have the correct public scheme/host/port.
- */
-@Configuration
-class ForwardedHeadersConfig {
-    @Bean
-    public ForwardedHeaderFilter forwardedHeaderFilter() {
-        return new ForwardedHeaderFilter();
+    private static String randomCode() {
+        return UUID.randomUUID().toString().replace("-", "").substring(0, 6);
     }
 }
