@@ -15,6 +15,7 @@ import org.springframework.web.multipart.support.StandardServletMultipartResolve
 
 import javax.sql.DataSource;
 import java.util.Properties;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @Configuration
 @EnableTransactionManagement
@@ -38,6 +39,10 @@ public class AppConfig {
         ds.setMaximumPoolSize(10);
         ds.setMinimumIdle(2);
         return ds;
+    }
+    @Bean(name={"tem"})
+    public JdbcTemplate jdbcTemplate(DataSource datasoucre){
+        return new JdbcTemplate(datasoucre);
     }
 
     // ---------- JPA: EntityManagerFactory ----------
