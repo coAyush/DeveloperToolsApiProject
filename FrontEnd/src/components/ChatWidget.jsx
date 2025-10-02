@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Send, Bot, User, Loader2, MessageCircle } from "lucide-react";
+import { Send, Bot, Loader2, MessageCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Floating Chatbot Widget with transition animation
+// ✅ Base URL (empty "" means same-origin; override with VITE_API_BASE in prod)
+const API_BASE = "http://localhost:8080/DeveloperToolsApiProject";
 
 export default function ChatWidget() {
   const [open, setOpen] = useState(false);
@@ -38,13 +39,19 @@ export default function ChatWidget() {
 
     setLoading(true);
     try {
-      const res = await fetch("/api/chat", {
+      const res = await fetch(`${API_BASE}/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: text }),
       });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`HTTP ${res.status}: ${errText}`);
+      }
+
       const data = await res.json();
-      const reply = data?.reply ?? "(no reply)";
+      const reply = data?.reply ?? data?.error ?? "(no reply)";
       const botMsg = {
         id: crypto.randomUUID(),
         role: "assistant",
@@ -58,7 +65,8 @@ export default function ChatWidget() {
         {
           id: crypto.randomUUID(),
           role: "assistant",
-          content: "⚠️ Network error. Try again.",
+          content:
+            "⚠️ Couldn’t reach the server. In dev, check your proxy. In prod, set VITE_API_BASE.",
         },
       ]);
     } finally {
