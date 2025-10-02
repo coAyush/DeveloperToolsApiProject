@@ -22,7 +22,7 @@ public class DAO {
     
     public int saveUser(Users user){
         String query="INSERT INTO users(Name,Email,password) VALUES(?,?,?)";
-        return template.update(query,user.getName(),user.getEmail(),user.getPassword());
+        return template.update(query,user.getUsername(),user.getEmail(),user.getPassword());
     }
     
     public Users selectUser(int id){
@@ -31,7 +31,7 @@ public class DAO {
                 (rs,rowNum)->{
                  Users u = new Users();
    
-            u.setName(rs.getString("name"));
+            u.setUsername(rs.getString("name"));
             u.setEmail(rs.getString("email"));
             return u;},
                 id);
