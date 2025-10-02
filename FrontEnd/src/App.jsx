@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import QrTool from "./pages/QrTool";
 import PasswordGen from "./pages/PasswordGen";
 import UrlShortener from "./pages/UrlShortener";
+import UuidGenerator from "./pages/UuidGenerator";
 import Contact from "./pages/Contact";
 import About from "./pages/About";
 
@@ -75,7 +76,7 @@ const App = () => {
         path="/contact"
         element={
           <PrivateLayout>
-            <Contact/>
+            <Contact />
           </PrivateLayout>
         }
       />
@@ -98,7 +99,22 @@ const App = () => {
           </PrivateLayout>
         }
       />
-      <Route path="/tools/password" element={<PrivateLayout><PasswordGen /></PrivateLayout>} />
+      <Route
+        path="/tools/password"
+        element={
+          <PrivateLayout>
+            <PasswordGen />
+          </PrivateLayout>
+        }
+      />
+      <Route
+        path="/tools/uuid"
+        element={
+          <PrivateLayout>
+            <UuidGenerator />
+          </PrivateLayout>
+        }
+      />
     </Routes>
   );
 };
