@@ -96,6 +96,12 @@ const Home = () => {
           desc="Create strong, secure passwords with a single click. Stay safe online."
           link="/tools/password"
         />
+        <ToolCard
+          icon={KeyRound} // you can swap for another icon like Fingerprint, Hash, or Shield from lucide-react
+          title="UUID Generator"
+          desc="Generate unique identifiers instantly for your apps, databases, or integrations."
+          link="/tools/uuid"
+        />
       </div>
       <ChatWidget />
     </div>
