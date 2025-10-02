@@ -35,8 +35,7 @@ public class ChatBotController {
         }
 
         // 2) Gemini endpoint
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + API_KEY;
-
+String url = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=" + API_KEY;
         // 3) Build request body
         Map<String, Object> textPart = new HashMap<>();
         textPart.put("text", usermsg);

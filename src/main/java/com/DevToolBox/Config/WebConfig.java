@@ -9,13 +9,13 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 @ComponentScan(basePackages = "com.DevToolBox")
 public class WebConfig implements WebMvcConfigurer {
 
-    @Bean
+    /*@Bean
     public InternalResourceViewResolver viewResolver() {
         InternalResourceViewResolver vr = new InternalResourceViewResolver();
         vr.setPrefix("/WEB-INF/views/");
         vr.setSuffix(".jsp"); // only if you plan to use JSP, React won’t need this
         return vr;
-    }
+    }*/
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -26,7 +26,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
                 .allowedOrigins("http://localhost:3000", "http://localhost:5173")
-                .allowedMethods("GET","POST")
+                .allowedMethods("GET","POST","PUT","DELETE","OPTIONS")
                 .allowedHeaders("*");
     }
 }
