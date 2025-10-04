@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Intro from "./pages/Intro";
@@ -14,6 +14,7 @@ import ImagePlaceholder from "./pages/ImagePlaceholder";
 import Contact from "./pages/Contact";
 import About from "./pages/About";
 import ImageToPdf from "./pages/ImageToPdf";
+import ChatWidget from "./components/ChatWidget";
 
 // Public layout (without Navbar & Footer)
 const PublicLayout = ({ children }) => <>{children}</>;
@@ -28,6 +29,13 @@ const PrivateLayout = ({ children }) => {
     </div>
   );
 };
+
+function GlobalChat() {
+  const { pathname } = useLocation();
+  const HIDE_ON = ["/login", "/signup", "/"]; // add "/" if you want to hide on Intro too
+  if (HIDE_ON.includes(pathname)) return null;
+  return <ChatWidget />;
+}
 
 const App = () => {
   return (
@@ -144,6 +152,8 @@ const App = () => {
           }
         />
       </Routes>
+
+      <GlobalChat />
     </>
   );
 };

@@ -128,7 +128,7 @@ const Home = () => {
           link="/tools/placeholder"
         />
       </div>
-      <ChatWidget />
+      {/* <ChatWidget /> */}
     </div>
   );
 };
