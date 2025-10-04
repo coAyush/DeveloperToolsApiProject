@@ -61,4 +61,3 @@ FrontEnd/node_modules/
 
 # But allow example env files (to share required variable names)
 !.env.example
-!Backend/.env.example
