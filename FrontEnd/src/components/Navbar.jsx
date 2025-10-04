@@ -75,6 +75,20 @@ const Navbar = () => {
                   >
                     UUID Generator
                   </Link>
+                  <Link
+                    to="/tools/pdf-compressor"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={() => setToolsOpen(false)}
+                  >
+                    Pdf Compressor
+                  </Link>
+                  <Link
+                    to="/tools/img-to-pdf"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={() => setToolsOpen(false)}
+                  >
+                    Image To Pdf
+                  </Link>
                 </div>
               )}
             </div>
@@ -151,6 +165,36 @@ const Navbar = () => {
                 }}
               >
                 Password Generator
+              </Link>
+              <Link
+                to="/tools/pdf-compressor"
+                className="block text-gray-700 hover:text-blue-600"
+                onClick={() => {
+                  setIsOpen(false);
+                  setToolsOpen(false);
+                }}
+              >
+                Pdf Compressor
+              </Link>
+              <Link
+                to="/tools/uuid"
+                className="block text-gray-700 hover:text-blue-600"
+                onClick={() => {
+                  setIsOpen(false);
+                  setToolsOpen(false);
+                }}
+              >
+                UUID Generator
+              </Link>
+              <Link
+                to="/tools/img-to-pdf"
+                className="block text-gray-700 hover:text-blue-600"
+                onClick={() => {
+                  setIsOpen(false);
+                  setToolsOpen(false);
+                }}
+              >
+                Image To Pdf
               </Link>
             </div>
           )}
