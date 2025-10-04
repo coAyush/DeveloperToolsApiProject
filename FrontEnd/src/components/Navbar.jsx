@@ -196,6 +196,16 @@ const Navbar = () => {
               >
                 Image To Pdf
               </Link>
+              <Link
+                to="/tools/placeholder"
+                className="block text-gray-700 hover:text-blue-600"
+                onClick={() => {
+                  setIsOpen(false);
+                  setToolsOpen(false);
+                }}
+              >
+                Image Placeholder
+              </Link>
             </div>
           )}
           <Link

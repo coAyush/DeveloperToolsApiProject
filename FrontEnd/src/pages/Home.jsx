@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { QrCode, Link2, KeyRound, FileText, FileImage } from "lucide-react"; // 👈 FileImage add kiya
+import {
+  QrCode,
+  Link2,
+  KeyRound,
+  FileText,
+  FileImage,
+  Image as ImageIcon,
+} from "lucide-react"; // 👈 FileImage add kiya
 import { Link } from "react-router-dom"; // 👈 ToolCard ke andar Link use ho raha tha, import missing tha
 import ChatWidget from "../components/ChatWidget"; // 👈 ChatWidget ka import bhi add karo
 
@@ -114,8 +121,14 @@ const Home = () => {
           desc="Convert one or multiple images into a single PDF file instantly."
           link="/tools/img-to-pdf"
         />
+        <ToolCard
+          icon={ImageIcon}
+          title="Image Placeholder"
+          desc="Create crisp placeholder images with custom size, colors, and text — perfect for mocks."
+          link="/tools/placeholder"
+        />
       </div>
-      <ChatWidget />
+      {/* <ChatWidget /> */}
     </div>
   );
 };

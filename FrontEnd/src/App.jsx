@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Intro from "./pages/Intro";
@@ -9,11 +9,12 @@ import QrTool from "./pages/QrTool";
 import PasswordGen from "./pages/PasswordGen";
 import UrlShortener from "./pages/UrlShortener";
 import UuidGenerator from "./pages/UuidGenerator";
+import PdfCompressor from "./pages/PdfCompressor";
+import ImagePlaceholder from "./pages/ImagePlaceholder";
 import Contact from "./pages/Contact";
 import About from "./pages/About";
-import PdfCompressor from "./pages/PdfCompressor";
 import ImageToPdf from "./pages/ImageToPdf";
-
+import ChatWidget from "./components/ChatWidget";
 
 // Public layout (without Navbar & Footer)
 const PublicLayout = ({ children }) => <>{children}</>;
@@ -28,6 +29,13 @@ const PrivateLayout = ({ children }) => {
     </div>
   );
 };
+
+function GlobalChat() {
+  const { pathname } = useLocation();
+  const HIDE_ON = ["/login", "/signup", "/"]; // add "/" if you want to hide on Intro too
+  if (HIDE_ON.includes(pathname)) return null;
+  return <ChatWidget />;
+}
 
 const App = () => {
   return (
@@ -135,7 +143,17 @@ const App = () => {
             </PrivateLayout>
           }
         />
+        <Route
+          path="/tools/placeholder"
+          element={
+            <PrivateLayout>
+              <ImagePlaceholder />
+            </PrivateLayout>
+          }
+        />
       </Routes>
+
+      <GlobalChat />
     </>
   );
 };
