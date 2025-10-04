@@ -9,11 +9,11 @@ import QrTool from "./pages/QrTool";
 import PasswordGen from "./pages/PasswordGen";
 import UrlShortener from "./pages/UrlShortener";
 import UuidGenerator from "./pages/UuidGenerator";
+import PdfCompressor from "./pages/PdfCompressor";
+import ImagePlaceholder from "./pages/ImagePlaceholder";
 import Contact from "./pages/Contact";
 import About from "./pages/About";
-import PdfCompressor from "./pages/PdfCompressor";
 import ImageToPdf from "./pages/ImageToPdf";
-
 
 // Public layout (without Navbar & Footer)
 const PublicLayout = ({ children }) => <>{children}</>;
@@ -132,6 +132,14 @@ const App = () => {
           element={
             <PrivateLayout>
               <UuidGenerator />
+            </PrivateLayout>
+          }
+        />
+        <Route
+          path="/tools/placeholder"
+          element={
+            <PrivateLayout>
+              <ImagePlaceholder />
             </PrivateLayout>
           }
         />
