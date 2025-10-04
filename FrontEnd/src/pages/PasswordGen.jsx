@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Copy, Loader2, RefreshCw } from "lucide-react";
 import axios from "axios";
-import toast, { Toaster } from "react-hot-toast";
-
+import toast from "react-hot-toast";  
 const API_BASE = "http://localhost:8080/DeveloperToolsApiProject/api";
 
 const PasswordGen = () => {
@@ -35,7 +34,7 @@ const PasswordGen = () => {
 
       if (data?.password) {
         setPassword(data.password);
-        toast.success("Password generated successfully!");
+        toast.success("✅ Password generated successfully!");
       } else {
         toast.error("No password returned from server.");
       }
@@ -55,19 +54,7 @@ const PasswordGen = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-cyan-50 px-6 py-20">
-      <Toaster
-        position="top-right"
-        containerStyle={{ top: 80 }} // 
-        toastOptions={{
-          style: {
-            background: "#fff",
-            color: "#333",
-            border: "1px solid #e2e8f0",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-            fontSize: "14px",
-          },
-        }}
-      />
+      {/* ✅ Local Toaster removed, global App.js wala kaam karega */}
 
       {/* Title */}
       <h1 className="text-3xl md:text-5xl font-extrabold text-center bg-gradient-to-r from-blue-600 to-cyan-400 bg-clip-text text-transparent mb-10">
