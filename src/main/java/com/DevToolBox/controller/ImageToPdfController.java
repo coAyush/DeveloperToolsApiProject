@@ -12,6 +12,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,13 +28,14 @@ public class ImageToPdfController {
 
     @Autowired
     private ImageToPdf service;
-
+     
+    @PostMapping("/single")
     public void ImageToPdfSingle(@RequestParam("file") MultipartFile file, HttpServletResponse response) throws Exception {
         response.setContentType(MediaType.APPLICATION_PDF_VALUE);
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=image.pdf");
         service.convertSingle(file.getInputStream(), response.getOutputStream());
     }
-    
+    @PostMapping("/multiple")
     public void ImageToPdfMultiple(@RequestParam("files")MultipartFile[] files,HttpServletResponse response)throws Exception{
           response.setContentType(MediaType.APPLICATION_PDF_VALUE);
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=images.pdf");

@@ -50,3 +50,15 @@ nbdist/
 # Frontend
 # ===============================================================
 FrontEnd/node_modules/
+
+# ===============================================================
+# Environment Variables (DO NOT COMMIT SECRETS)
+# ===============================================================
+# Ignore all env files containing secrets
+.env
+.env.*
+*.env
+
+# But allow example env files (to share required variable names)
+!.env.example
+!Backend/.env.example
