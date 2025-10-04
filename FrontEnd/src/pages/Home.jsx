@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { QrCode, Link2, KeyRound } from "lucide-react";
-import { Link } from "react-router-dom";
-import ChatWidget from "../components/ChatWidget";
+import { QrCode, Link2, KeyRound, FileText, FileImage } from "lucide-react"; // 👈 FileImage add kiya
+import { Link } from "react-router-dom"; // 👈 ToolCard ke andar Link use ho raha tha, import missing tha
+import ChatWidget from "../components/ChatWidget"; // 👈 ChatWidget ka import bhi add karo
 
 const quotes = [
   "🚀 Empower your creativity — the right tools make magic happen.",
@@ -97,10 +97,22 @@ const Home = () => {
           link="/tools/password"
         />
         <ToolCard
-          icon={KeyRound} // you can swap for another icon like Fingerprint, Hash, or Shield from lucide-react
+          icon={KeyRound}
           title="UUID Generator"
           desc="Generate unique identifiers instantly for your apps, databases, or integrations."
           link="/tools/uuid"
+        />
+        <ToolCard
+          icon={FileText}
+          title="PDF Compressor"
+          desc="Easily compress and reduce the size of your PDF files without losing quality."
+          link="/tools/pdf-compressor"
+        />
+        <ToolCard
+          icon={FileImage}
+          title="Image to PDF"
+          desc="Convert one or multiple images into a single PDF file instantly."
+          link="/tools/img-to-pdf"
         />
       </div>
       <ChatWidget />
