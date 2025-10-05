@@ -1,47 +1,56 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.DevToolBox.controller;
 
+import java.time.Instant;
 import java.util.Base64;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;   // ✅ correct
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-/**
- *
- * @author USER
- */
 @RestController
 @RequestMapping("/api/imageplaceholder")
 public class ImagePlaceholder {
-    
+
     @Autowired
-    RestTemplate template;
-    private static final String OPEN_AI_API_KEY=System.getProperty("OPEN_AI_API_KEY");
+    private RestTemplate template;
+
+    // Read from OS/Tomcat environment variables
+    private static final String OPENAI_KEY = System.getenv("OPEN_AI_API_KEY");
+
+    @GetMapping("/_debug")
+    public ResponseEntity<String> debug() {
+        int len = OPENAI_KEY == null ? 0 : OPENAI_KEY.length();
+        return ResponseEntity.ok("OPEN_AI_API_KEY length=" + len + " @ " + Instant.now());
+    }
+
+    @GetMapping("/_health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("OK " + Instant.now());
+    }
+
     @GetMapping(value = "/placeholder/{category}", produces = MediaType.IMAGE_PNG_VALUE)
-    public byte[] placeholder(@PathVariable String category) {
-        if (OPEN_AI_API_KEY == null || OPEN_AI_API_KEY.isBlank()) {
-            return tinyPng();
+    public ResponseEntity<byte[]> placeholder(@PathVariable String category) {
+        if (OPENAI_KEY == null || OPENAI_KEY.isBlank()) {
+            return png(tinyPng(), "fallback-no-key");
         }
 
-        String prompt = switch (category.toLowerCase()) 
-        {
-            case "avatar"    -> "Simple avatar placeholder illustration, flat style, minimal.";
-            case "landscape" -> "Simple scenic landscape placeholder illustration, flat style.";
-            case "food"      -> "Simple food placeholder illustration, flat style.";
-            case "product"   -> "Simple product thumbnail placeholder illustration, flat style.";
-            default          -> "Generic placeholder illustration, flat style.";
+        String prompt = switch (category.toLowerCase()) {
+            case "avatar" ->
+                "Simple avatar placeholder illustration, flat style, minimal.";
+            case "landscape" ->
+                "Simple scenic landscape placeholder illustration, flat style.";
+            case "food" ->
+                "Simple food placeholder illustration, flat style.";
+            case "product" ->
+                "Simple product thumbnail placeholder illustration, flat style.";
+            default ->
+                "Generic placeholder illustration, flat style.";
         };
-        
+
         try {
             String url = "https://api.openai.com/v1/images/generations";
 
@@ -51,33 +60,62 @@ public class ImagePlaceholder {
                     "size", "512x512",
                     "response_format", "b64_json"
             );
-            
+
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(OPEN_AI_API_KEY);
+            headers.setBearerAuth(OPENAI_KEY);
 
             HttpEntity<Map<String, Object>> req = new HttpEntity<>(body, headers);
-            Map<?, ?> resp = template.postForObject(url, req, Map.class);
 
-            List<?> data = (List<?>) resp.get("data");
-            if (data == null || data.isEmpty()) return tinyPng();
+            @SuppressWarnings("unchecked")
+            Map<String, Object> resp = template.postForObject(url, req, Map.class);
+            if (resp == null) {
+                return png(tinyPng(), "fallback-null-response");
+            }
 
-            Map<?, ?> first = (Map<?, ?>) data.get(0);
-            String b64 = (String) first.get("b64_json");
-            if (b64 == null) return tinyPng();
+            Object dataObj = resp.get("data");
+            if (!(dataObj instanceof List<?> data) || data.isEmpty()) {
+                return png(tinyPng(), "fallback-empty-data");
+            }
 
-            return Base64.getDecoder().decode(b64);
+            Object firstObj = data.get(0);
+            if (!(firstObj instanceof Map<?, ?> first)) {
+                return png(tinyPng(), "fallback-bad-first");
+            }
 
+            Object b64Obj = first.get("b64_json");
+            if (!(b64Obj instanceof String b64) || b64.isBlank()) {
+                return png(tinyPng(), "fallback-no-b64");
+            }
+
+            byte[] pngBytes = Base64.getDecoder().decode(b64);
+            return png(pngBytes, "openai");
+
+        } catch (HttpClientErrorException e) {
+            System.out.println("OpenAI HTTP " + e.getStatusCode());
+            System.out.println("OpenAI error body: " + e.getResponseBodyAsString()); // <-- the reason
+            return png(tinyPng(), "fallback-openai-error");
         } catch (Exception e) {
             e.printStackTrace();
-            return tinyPng();
+            return png(tinyPng(), "fallback-exception");
         }
+
+    }
+
+    // ---------- helpers ----------
+    private ResponseEntity<byte[]> png(byte[] bytes, String sourceTag) {
+        HttpHeaders h = new HttpHeaders();
+        h.setContentType(MediaType.IMAGE_PNG);
+        h.setCacheControl(CacheControl.noCache().getHeaderValue());
+        h.add("X-Source", sourceTag); // openai or fallback-*
+        return new ResponseEntity<>(bytes, h, HttpStatus.OK);
+        // Content-Disposition not set: this is intended for inline display; add if you want downloads.
     }
 
     private byte[] tinyPng() {
+        // 1x1 transparent PNG
         return Base64.getDecoder().decode(
-            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII="
+                "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII="
         );
     }
 }
-    
