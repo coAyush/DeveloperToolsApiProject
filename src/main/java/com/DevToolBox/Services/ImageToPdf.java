@@ -14,9 +14,16 @@ import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import com.DevToolBox.dao.UsagesDAO;
 
 @Service
-public class ImageToPdf{
+public class ImageToPdf {
+
+    private final UsagesDAO usage;
+
+    public ImageToPdf(UsagesDAO usage) {
+        this.usage = usage;
+    }
 
     /**
      * Convert one image to a single-page PDF.
@@ -26,8 +33,8 @@ public class ImageToPdf{
     }
 
     /**
-     * Convert multiple images to a multi-page PDF.
-     * One image per page, auto-rotate page, auto-scale to fit.
+     * Convert multiple images to a multi-page PDF. One image per page,
+     * auto-rotate page, auto-scale to fit.
      */
     public void convertMany(List<InputStream> imageInputs, OutputStream pdfOutput) throws Exception {
         try (PDDocument doc = new PDDocument()) {
@@ -74,13 +81,19 @@ public class ImageToPdf{
 
             // Save the document to the provided OutputStream
             doc.save(pdfOutput);
+
+            try {
+                usage.saveUsage("Ayush", "Image To Pdf Converter");
+            } catch (Exception e) {
+                System.out.println("failed to catch log");
+            }
         }
     }
 
     /**
-     * Create a PDImageXObject best-suited for the source image.
-     * - If original had no alpha and looks like a JPEG source, JPEGFactory is efficient.
-     * - If image has alpha/transparency (e.g., PNG with alpha), use LosslessFactory.
+     * Create a PDImageXObject best-suited for the source image. - If original
+     * had no alpha and looks like a JPEG source, JPEGFactory is efficient. - If
+     * image has alpha/transparency (e.g., PNG with alpha), use LosslessFactory.
      */
     private PDImageXObject createImageXObject(PDDocument doc, BufferedImage img) throws Exception {
         // Heuristic: if the image has alpha channel, use lossless to preserve it.

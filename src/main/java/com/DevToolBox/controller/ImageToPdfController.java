@@ -28,6 +28,7 @@ public class ImageToPdfController {
 
     @Autowired
     private ImageToPdf service;
+
      
     @PostMapping("/single")
     public void ImageToPdfSingle(@RequestParam("file") MultipartFile file, HttpServletResponse response) throws Exception {
@@ -35,15 +36,19 @@ public class ImageToPdfController {
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=image.pdf");
         service.convertSingle(file.getInputStream(), response.getOutputStream());
     }
+
     @PostMapping("/multiple")
-    public void ImageToPdfMultiple(@RequestParam("files")MultipartFile[] files,HttpServletResponse response)throws Exception{
-          response.setContentType(MediaType.APPLICATION_PDF_VALUE);
+    public void ImageToPdfMultiple(@RequestParam("files") MultipartFile[] files, HttpServletResponse response) throws Exception {
+        response.setContentType(MediaType.APPLICATION_PDF_VALUE);
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=images.pdf");
 
         List<java.io.InputStream> streams = Arrays.stream(files)
                 .map(f -> {
-                    try { return f.getInputStream(); }
-                    catch (IOException e) { throw new RuntimeException(e); }
+                    try {
+                        return f.getInputStream();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                 })
                 .toList();
 

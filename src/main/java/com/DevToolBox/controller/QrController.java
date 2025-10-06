@@ -13,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
+import com.DevToolBox.dao.UsagesDAO;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -24,9 +24,10 @@ import java.util.*;
 public class QrController {
 
     private final Cloudinary cloudinary;
-
-    public QrController(Cloudinary cloudinary) {
+     private final UsagesDAO usage;
+    public QrController(Cloudinary cloudinary,UsagesDAO usage) {
         this.cloudinary = cloudinary;
+        this.usage=usage;
     }
 
     /**
@@ -89,7 +90,11 @@ public class QrController {
         if (fileUrl != null) {
             out.put("fileUrl", fileUrl);
         }
-
+        try{
+        usage.saveUsage("Ayush", "QR Code Generator");
+        }catch(Exception e){
+            System.out.println("failed to catch log");
+        }
         return ResponseEntity.ok(out);
     }
 

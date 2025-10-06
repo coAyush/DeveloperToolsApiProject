@@ -27,13 +27,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 public class AppConfig {
 
     // ---------- DataSource (HikariCP) ----------
-    @Bean
+     @Bean(destroyMethod = "close")
+    @Primary
     public DataSource dataSource() {
         HikariDataSource ds = new HikariDataSource();
         // ❗ Move secrets to env vars in real deployments
         ds.setJdbcUrl(getEnv("DB_URL", "jdbc:mysql://localhost:3306/DevTools?useSSL=false&serverTimezone=UTC"));
         ds.setUsername(getEnv("DB_USER", "root"));
-        ds.setPassword(getEnv("DB_PASS", "ayush52141")); // <- replace / externalize
+        ds.setPassword(getEnv("DB_PASSWORD", "")); // <- replace / externalize
         ds.setDriverClassName("com.mysql.cj.jdbc.Driver");
         // optional pool tuning
         ds.setMaximumPoolSize(10);
