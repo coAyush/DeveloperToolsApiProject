@@ -68,7 +68,7 @@ const Footer = () => {
             <h3 className="font-semibold text-gray-700">Contact</h3>
             <button
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2 hover:text-blue-600 transition"
+              className="flex items-center gap-2 hover:text-blue-600 cursor-pointer transition"
             >
               <Mail size={16} /> devtoolbox@example.com
             </button>
