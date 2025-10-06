@@ -5,16 +5,15 @@ import { User, ChevronDown } from "lucide-react";
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false); // mobile menu
   const [toolsOpen, setToolsOpen] = useState(false); // tools dropdown
-
   const toolsRef = useRef();
 
-  // Close tools dropdown when clicked outside
+  // Close dropdown when clicked outside
   useEffect(() => {
-    function handleClickOutside(event) {
+    const handleClickOutside = (event) => {
       if (toolsRef.current && !toolsRef.current.contains(event.target)) {
         setToolsOpen(false);
       }
-    }
+    };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -46,7 +45,7 @@ const Navbar = () => {
                 Tools <ChevronDown size={16} />
               </button>
               {toolsOpen && (
-                <div className="absolute bg-white shadow-lg rounded-md mt-2 w-44 z-50 animate-fade-in">
+                <div className="absolute bg-white shadow-lg rounded-md mt-2 w-48 z-50 animate-fade-in border border-gray-100">
                   <Link
                     to="/tools/qr"
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -80,14 +79,28 @@ const Navbar = () => {
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     onClick={() => setToolsOpen(false)}
                   >
-                    Pdf Compressor
+                    PDF Compressor
                   </Link>
                   <Link
                     to="/tools/img-to-pdf"
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                     onClick={() => setToolsOpen(false)}
                   >
-                    Image To Pdf
+                    Image to PDF
+                  </Link>
+                  <Link
+                    to="/tools/word-to-pdf"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={() => setToolsOpen(false)}
+                  >
+                    Word to PDF
+                  </Link>
+                  <Link
+                    to="/tools/placeholder"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={() => setToolsOpen(false)}
+                  >
+                    Image Placeholder
                   </Link>
                 </div>
               )}
@@ -128,12 +141,14 @@ const Navbar = () => {
           >
             Home
           </Link>
+
           <button
             className="block w-full text-left text-gray-700 hover:text-blue-600"
             onClick={() => setToolsOpen(!toolsOpen)}
           >
             Tools <ChevronDown size={14} className="inline ml-1" />
           </button>
+
           {toolsOpen && (
             <div className="ml-4 space-y-1 animate-slide-down">
               <Link
@@ -167,16 +182,6 @@ const Navbar = () => {
                 Password Generator
               </Link>
               <Link
-                to="/tools/pdf-compressor"
-                className="block text-gray-700 hover:text-blue-600"
-                onClick={() => {
-                  setIsOpen(false);
-                  setToolsOpen(false);
-                }}
-              >
-                Pdf Compressor
-              </Link>
-              <Link
                 to="/tools/uuid"
                 className="block text-gray-700 hover:text-blue-600"
                 onClick={() => {
@@ -187,6 +192,16 @@ const Navbar = () => {
                 UUID Generator
               </Link>
               <Link
+                to="/tools/pdf-compressor"
+                className="block text-gray-700 hover:text-blue-600"
+                onClick={() => {
+                  setIsOpen(false);
+                  setToolsOpen(false);
+                }}
+              >
+                PDF Compressor
+              </Link>
+              <Link
                 to="/tools/img-to-pdf"
                 className="block text-gray-700 hover:text-blue-600"
                 onClick={() => {
@@ -194,7 +209,17 @@ const Navbar = () => {
                   setToolsOpen(false);
                 }}
               >
-                Image To Pdf
+                Image to PDF
+              </Link>
+              <Link
+                to="/tools/word-to-pdf"
+                className="block text-gray-700 hover:text-blue-600"
+                onClick={() => {
+                  setIsOpen(false);
+                  setToolsOpen(false);
+                }}
+              >
+                Word to PDF
               </Link>
               <Link
                 to="/tools/placeholder"
@@ -208,6 +233,7 @@ const Navbar = () => {
               </Link>
             </div>
           )}
+
           <Link
             to="/about"
             className="block text-gray-700 hover:text-blue-600"
@@ -215,6 +241,7 @@ const Navbar = () => {
           >
             About
           </Link>
+
           <Link
             to="/login"
             className="block text-gray-700 hover:text-blue-600"
