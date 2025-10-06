@@ -15,6 +15,7 @@ import Contact from "./pages/Contact";
 import About from "./pages/About";
 import ImageToPdf from "./pages/ImageToPdf";
 import ChatWidget from "./components/ChatWidget";
+import WordToPdf from "./pages/WordToPdf";
 
 // Public layout (without Navbar & Footer)
 const PublicLayout = ({ children }) => <>{children}</>;
@@ -73,6 +74,14 @@ const App = () => {
           element={
             <PrivateLayout>
               <Home />
+            </PrivateLayout>
+          }
+        />
+        <Route
+          path="/tools/word-to-pdf"
+          element={
+            <PrivateLayout>
+              <WordToPdf/>
             </PrivateLayout>
           }
         />
