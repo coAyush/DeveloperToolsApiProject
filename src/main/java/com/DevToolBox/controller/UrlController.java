@@ -30,6 +30,7 @@ public class UrlController {
     @PostMapping("/shorten")
     public String shorten(@RequestBody Map<String,String> body) {
         // urlService.shortenUrl should accept (originalUrl, alias) where alias may be null/blank
+        System.out.println("controller working");
         return urlService.shortenUrl(body.get("url"),body.get("alias"));
     }
 
