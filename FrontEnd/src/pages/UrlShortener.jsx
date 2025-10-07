@@ -54,17 +54,18 @@ const UrlShortener = () => {
       const payload = { url: longUrl };
       if (alias.trim()) payload.alias = alias.trim();
 
-      const { data } = await axios.post(`${API_BASE}/shorten`, payload, {
+      const { data } = await axios.post(`${API_BASE}/url/shorten`, payload, {
         headers: { "Content-Type": "application/json" },
       });
 
-      const shortUrl = data?.shortUrl || data?.short || data?.data?.shortUrl;
-      const code = data?.code || data?.id || data?.data?.code;
+      const shortUrl = data;
 
-      if (!shortUrl) {
-        setErr("No shortened URL returned from server.");
+      // Check if we received a valid-looking string
+      if (shortUrl && typeof shortUrl === "string") {
+        // Since the response is just a string, we no longer receive a separate 'code'.
+        setResult({ shortUrl: shortUrl, code: null });
       } else {
-        setResult({ shortUrl, code });
+        setErr("Invalid response received from the server.");
       }
     } catch (e) {
       console.error(e);
