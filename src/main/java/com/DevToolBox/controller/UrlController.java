@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/url")
@@ -23,12 +24,13 @@ public class UrlController {
      * Example calls:
      *  - POST /api/url/shorten?originalUrl=https://example.com
      *  - POST /api/url/shorten?originalUrl=https://example.com&alias=myAlias
+     * @param body
+     * @return 
      */
     @PostMapping("/shorten")
-    public String shorten(@RequestParam("originalUrl") String originalUrl,
-                          @RequestParam(value = "alias", required = false) String alias) {
+    public String shorten(@RequestBody Map<String,String> body) {
         // urlService.shortenUrl should accept (originalUrl, alias) where alias may be null/blank
-        return urlService.shortenUrl(originalUrl, alias);
+        return urlService.shortenUrl(body.get("url"),body.get("alias"));
     }
 
     @GetMapping("/{code}")
