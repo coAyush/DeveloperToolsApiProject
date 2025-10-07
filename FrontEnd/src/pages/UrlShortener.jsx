@@ -58,7 +58,7 @@ const UrlShortener = () => {
         headers: { "Content-Type": "application/json" },
       });
 
-      const shortUrl = `${window.location.origin}/r/${code}`;
+      const shortUrl = `${window.location.origin}/r/${data}`;
 
       // Check if we received a valid-looking string
       if (shortUrl && typeof shortUrl === "string") {
