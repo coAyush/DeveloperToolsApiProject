@@ -2,6 +2,7 @@ package com.DevToolBox.Services;
 
 import com.DevToolBox.dao.UserDao;
 import com.DevToolBox.Model.Users;
+import com.DevToolBox.util.PasswordUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -9,21 +10,28 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
     @Autowired
-    private UserDao userDao;
+    private  UserDao userDao;
+    @Autowired
+    private  PasswordUtil passwordUtil;
 
-    // returns plain strings that contain "successful" to match your frontend check
     public String signup(String name, String email, String password) {
-        if (email == null || email.isBlank() || password == null || password.isBlank() || name == null || name.isBlank()) {
+        if (name == null || name.isBlank() ||
+            email == null || email.isBlank() ||
+            password == null || password.isBlank()) {
             return "Signup failed: name, email and password are required";
         }
-        if (userDao.existsByEmail(email)) {
+
+        String normalizedEmail = email.trim().toLowerCase();
+        if (userDao.existsByEmail(normalizedEmail)) {
             return "Signup failed: user already exists";
         }
+
         Users u = new Users();
         u.setName(name.trim());
-        u.setEmail(email.trim().toLowerCase());
-        u.setPassword(password); // for quick start; replace with hashed later
+        u.setEmail(normalizedEmail);
+        u.setPassword(passwordUtil.hashPassword(password));
         userDao.save(u);
+
         return "Signup successful";
     }
 
@@ -31,13 +39,18 @@ public class AuthService {
         if (email == null || email.isBlank() || password == null || password.isBlank()) {
             return "Login failed: email and password required";
         }
-        Users u = userDao.findByEmail(email.trim().toLowerCase());
-        if (u == null) return "Login failed: user not found";
 
-        // plain-text compare for immediate functionality
-        if (!password.equals(u.getPassword())) {
+        String normalizedEmail = email.trim().toLowerCase();
+        Users u = userDao.findByEmail(normalizedEmail);
+        if (u == null) {
             return "Login failed: invalid credentials";
         }
+
+        boolean ok = passwordUtil.verifyPassword(password, u.getPassword());
+        if (!ok) {
+            return "Login failed: invalid credentials";
+        }
+
         return "Login successful";
     }
 }
