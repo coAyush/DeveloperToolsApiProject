@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const API_BASE = "http://localhost:8080/api/auth"; // ✅ Backend base URL
+const API_BASE = "http://localhost:8080/DeveloperToolsApiProject/api/auth"; // ✅ Backend base URL
 
 const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);

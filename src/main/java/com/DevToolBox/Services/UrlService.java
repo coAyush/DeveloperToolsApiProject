@@ -1,28 +1,29 @@
 package com.DevToolBox.Services;
 
-import com.DevToolBox.dao.UrlDao;
+import com.DevToolBox.dao.UrlDao; // or repository
 import com.DevToolBox.Model.Url;
 import com.DevToolBox.util.ShortCodeGenerator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UrlService {
 
-    @Autowired
-    private UrlDao urlDao;
+    private final UrlDao urlDao;
+
+    public UrlService(UrlDao urlDao) {
+        this.urlDao = urlDao;
+    }
 
     public String shortenUrl(String originalUrl, String alias) {
         String code;
 
         if (alias != null && !alias.trim().isEmpty()) {
-            // Check if alias already exists in DB
-            if (urlDao.findByCode(alias) != null) {
+            String trimmed = alias.trim();
+            if (urlDao.findByCode(trimmed) != null) {
                 throw new IllegalArgumentException("Alias already in use. Please choose another one.");
             }
-            code = alias.trim();
+            code = trimmed;
         } else {
-            // Generate unique random code
             do {
                 code = ShortCodeGenerator.generateCode(6);
             } while (urlDao.findByCode(code) != null);

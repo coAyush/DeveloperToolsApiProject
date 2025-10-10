@@ -10,7 +10,7 @@ import {
   Loader2,
 } from "lucide-react";
 
-const API_BASE = "http://localhost:8080/DeveloperToolsApiProject/api"; // ← adjust if needed
+const API_BASE = "http://localhost:8080/DeveloperToolsApiProject/api"; // ← keep as-is
 
 const isValidUrl = (value) => {
   try {
@@ -49,21 +49,29 @@ const UrlShortener = () => {
       return;
     }
 
+    // Optional client-side alias validation to avoid easy 409s
+    const trimmedAlias = alias.trim();
+    if (trimmedAlias && !/^[A-Za-z0-9_-]{1,64}$/.test(trimmedAlias)) {
+      setErr("Alias can contain letters, numbers, _ and - only (max 64).");
+      return;
+    }
+
     setLoading(true);
     try {
       const payload = { url: longUrl };
-      if (alias.trim()) payload.alias = alias.trim();
+      if (trimmedAlias) payload.alias = trimmedAlias;
 
       const { data } = await axios.post(`${API_BASE}/url/shorten`, payload, {
         headers: { "Content-Type": "application/json" },
       });
 
-      const shortUrl = `${window.location.origin}/api/url/${data}`;
-
-      // Check if we received a valid-looking string
-      if (shortUrl && typeof shortUrl === "string") {
-        // Since the response is just a string, we no longer receive a separate 'code'.
-        setResult({ shortUrl: shortUrl, code: null });
+      // ✅ Backend returns JSON: { shortUrl, code }
+      if (data && typeof data === "object" && data.shortUrl) {
+        setResult({ shortUrl: data.shortUrl, code: data.code ?? null });
+      } else if (typeof data === "string") {
+        // Fallback if backend ever returns just a code
+        const shortUrl = `${window.location.origin}/api/url/${data}`;
+        setResult({ shortUrl, code: data });
       } else {
         setErr("Invalid response received from the server.");
       }
@@ -71,6 +79,7 @@ const UrlShortener = () => {
       console.error(e);
       setErr(
         e?.response?.data?.message ||
+          e?.response?.data ||
           "Failed to shorten URL. Check backend and network."
       );
     } finally {
@@ -88,7 +97,9 @@ const UrlShortener = () => {
         el.classList.add("ring-2", "ring-cyan-400");
         setTimeout(() => el.classList.remove("ring-2", "ring-cyan-400"), 650);
       }
-    } catch {}
+    } catch {
+      // ignore clipboard errors
+    }
   };
 
   return (
@@ -128,7 +139,7 @@ const UrlShortener = () => {
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none transition-all hover:border-blue-400"
           />
           <p className="text-xs text-gray-500 mt-1">
-            Remove later if not added in backend.
+            Use letters, numbers, _ or - (max 64). Leave empty for random.
           </p>
         </div>
 
