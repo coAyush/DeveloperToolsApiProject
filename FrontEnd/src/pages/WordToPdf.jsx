@@ -30,7 +30,7 @@ const WordToPdf = () => {
     try {
       setLoading(true);
 
-      const response = await axios.post(`${API_BASE}/docx-to-pdf`, formData, {
+      const response = await axios.post(API_BASE, formData, {
         responseType: "blob",
         headers: { "Content-Type": "multipart/form-data" },
       });
