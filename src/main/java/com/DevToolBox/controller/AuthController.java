@@ -1,6 +1,9 @@
 package com.DevToolBox.controller;
 
+import com.DevToolBox.Model.Users;
 import com.DevToolBox.Services.AuthService;
+import jakarta.servlet.http.HttpSession;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +38,8 @@ public class AuthController {
         public LoginRequest() {}
         public String getEmail() { return email; }
         public String getPassword() { return password; }
+
+
         public void setEmail(String email) { this.email = email; }
         public void setPassword(String password) { this.password = password; }
     }
@@ -47,7 +52,18 @@ public class AuthController {
     }
 
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
-    public String login(@RequestBody LoginRequest req) {
-        return authService.login(req.email, req.password);
+    public String login(@RequestBody LoginRequest req,HttpSession session) {
+        Map<String,Object>m= authService.login(req.email, req.password);
+        if(m.containsKey("User")){
+            Users u=(Users) m.get("User");
+            session.setAttribute("Name", u.getName());
+            session.setAttribute("Email", u.getEmail());
+            System.out.println((String)session.getAttribute("Name"));
+                
+            return "Login successfull !!";
+        }else{
+            return (String)m.get("result");
+        }
+           
     }
 }

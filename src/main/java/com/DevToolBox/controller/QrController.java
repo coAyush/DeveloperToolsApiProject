@@ -18,11 +18,11 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.util.*;
+import jakarta.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("/api/qr")
 public class QrController {
-
     private final Cloudinary cloudinary;
      private final UsagesDAO usage;
     public QrController(Cloudinary cloudinary,UsagesDAO usage) {
@@ -41,7 +41,7 @@ public class QrController {
     )
     public ResponseEntity<Map<String, Object>> makeQr(
             @RequestParam(name = "text", required = false) String text,
-            @RequestParam(name = "file", required = false) MultipartFile file
+            @RequestParam(name = "file", required = false) MultipartFile file,HttpSession session
     ) {
         String fileUrl = null;
 
@@ -91,7 +91,7 @@ public class QrController {
             out.put("fileUrl", fileUrl);
         }
         try{
-        usage.saveUsage("Ayush", "QR Code Generator");
+        usage.saveUsage((String)session.getAttribute("Name"), "QR Code Generator");
         }catch(Exception e){
             System.out.println("failed to catch log");
         }
