@@ -28,7 +28,7 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Spring -->
+        <!-- Spring Core -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
@@ -64,61 +64,60 @@
             <version>3.5.3</version>
         </dependency>
 
-        <!-- MySQL Driver -->
+        <!-- MySQL -->
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
             <version>9.0.0</version>
         </dependency>
 
-        <!-- Testing -->
+        <!-- Spring Test -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
             <version>${spring.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- ORM + Hibernate -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-orm</artifactId>
             <version>${spring.version}</version>
         </dependency>
-        <!-- Hibernate JPA provider (Jakarta) -->
         <dependency>
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-core</artifactId>
             <version>6.5.2.Final</version>
         </dependency>
-
-        <!-- (Optional but recommended) explicit JPA API -->
         <dependency>
             <groupId>jakarta.persistence</groupId>
             <artifactId>jakarta.persistence-api</artifactId>
             <version>3.1.0</version>
         </dependency>
 
-        <!-- Connection pool -->
+        <!-- Connection Pool -->
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
             <version>5.1.0</version>
         </dependency>
 
-        <!-- Spring mail support: provides JavaMailSender bean adapters -->
+        <!-- Spring Mail -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context-support</artifactId>
             <version>${spring.version}</version>
         </dependency>
 
-        <!-- Activation API sometimes required by mail in certain environments -->
+        <!-- Activation API -->
         <dependency>
             <groupId>jakarta.activation</groupId>
             <artifactId>jakarta.activation-api</artifactId>
             <version>2.1.3</version>
         </dependency>
 
-        <!-- BCrypt for password hashing -->
+        <!-- Password Hashing -->
         <dependency>
             <groupId>org.mindrot</groupId>
             <artifactId>jbcrypt</artifactId>
@@ -129,29 +128,22 @@
             <artifactId>spring-tx</artifactId>
             <version>${spring.version}</version>
         </dependency>
-       
-        <!-- https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml -->
-        <!-- https://mvnrepository.com/artifact/fr.opensagres.xdocreport/fr.opensagres.xdocreport.document -->
-        
 
-        <!-- Optional JAX-RS / Mail -->
+        <!-- JUnit -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>5.10.2</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- JAX-RS -->
         <dependency>
             <groupId>jakarta.ws.rs</groupId>
             <artifactId>jakarta.ws.rs-api</artifactId>
             <version>3.1.0</version>
         </dependency>
-        <dependency>
-            <groupId>jakarta.mail</groupId>
-            <artifactId>jakarta.mail-api</artifactId>
-            <version>2.1.3</version>
-        </dependency>
-        
+
         <!-- Apache POI -->
         <dependency>
             <groupId>org.apache.poi</groupId>
@@ -164,7 +156,7 @@
             <version>5.2.5</version>
         </dependency>
 
-        <!-- XDocReport DOCX -> PDF (2.1.0, OpenPDF backend) -->
+        <!-- XDocReport -->
         <dependency>
             <groupId>fr.opensagres.xdocreport</groupId>
             <artifactId>fr.opensagres.poi.xwpf.converter.core</artifactId>
@@ -175,19 +167,49 @@
             <artifactId>fr.opensagres.poi.xwpf.converter.pdf.openpdf</artifactId>
             <version>2.1.0</version>
         </dependency>
-       
-        <!-- Lombok (JDK-21 compatible) -->
+
+        <!-- ✅ Fixed: JKTA with full Geronimo + OpenEJB exclusions -->
         <dependency>
             <groupId>org.tomitribe.jkta</groupId>
             <artifactId>jkta</artifactId>
             <version>0.12</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.tomee</groupId>
+                    <artifactId>openejb-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.tomee</groupId>
+                    <artifactId>openejb-cxf-rs</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.geronimo.javamail</groupId>
+                    <artifactId>geronimo-javamail_1.4_mail</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.geronimo.components</groupId>
+                    <artifactId>geronimo-connector</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.geronimo.components</groupId>
+                    <artifactId>geronimo-transaction</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.geronimo.specs</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
+
+        <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
+
+        <!-- PDF and Document Libraries -->
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
@@ -203,7 +225,6 @@
             <artifactId>docx4j-JAXB-ReferenceImpl</artifactId>
             <version>11.5.5</version>
         </dependency>
-        
 
         <dependency>
             <groupId>org.apache.tika</groupId>
@@ -215,7 +236,8 @@
             <artifactId>docx4j-export-fo</artifactId>
             <version>11.5.5</version>
         </dependency>
-        
+
+        <!-- Cloudinary -->
         <dependency>
             <groupId>com.cloudinary</groupId>
             <artifactId>cloudinary-http44</artifactId>
@@ -227,6 +249,8 @@
             <version>1.0.14</version>
             <type>jar</type>
         </dependency>
+
+        <!-- iText -->
         <dependency>
             <groupId>com.itextpdf</groupId>
             <artifactId>kernel</artifactId>
@@ -238,12 +262,14 @@
             <version>7.2.5</version>
         </dependency>
 
-
+        <!-- ✅ Correct Jakarta Mail -->
         <dependency>
             <groupId>com.sun.mail</groupId>
             <artifactId>jakarta.mail</artifactId>
             <version>2.0.1</version>
         </dependency>
+
+        <!-- Validation -->
         <dependency>
             <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>
@@ -254,12 +280,34 @@
             <artifactId>jakarta.validation-api</artifactId>
             <version>3.0.2</version>
         </dependency>
+
+        <!-- CXF -->
         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-rs-extension-search</artifactId>
             <version>3.3.1</version>
-            <type>jar</type>
+            <exclusions>
+                <!-- Exclude all OpenEJB and Geronimo dependencies that bring old mail and JTA APIs -->
+                <exclusion>
+                    <groupId>org.apache.tomee</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.geronimo.javamail</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.geronimo.components</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.geronimo.specs</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+
         </dependency>
+
     </dependencies>
 
     <build>

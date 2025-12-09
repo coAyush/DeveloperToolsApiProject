@@ -22,31 +22,33 @@ const QrTool = () => {
   }, [navigate]);
 
   // ✅ Generate QR from backend
-  const handleGenerate = async () => {
-    const formData = new FormData();
-    if (text) formData.append("text", text);
-    if (file) formData.append("file", file);
+const handleGenerate = async () => {
+  const formData = new FormData();
+  if (text) formData.append("text", text);
+  if (file) formData.append("file", file);
 
-    try {
-      const res = await axios.post(
-        "http://localhost:8080/DeveloperToolsApiProject/api/qr",
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
-
-      console.log("QR Response:", res.data);
-
-      // ✅ backend already returns full dataURL → just use directly
-      if (res.data.qrImageBase64) {
-        setQrPreview(res.data.qrImageBase64);
-      } else {
-        alert("No QR returned from server.");
+  try {
+    const res = await axios.post(
+      "http://localhost:8080/DeveloperToolsApiProject/api/qr",
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+        withCredentials: true // 🔥 send session cookie
       }
-    } catch (err) {
-      console.error("Error generating QR:", err);
-      alert("Failed to generate QR. Check backend logs.");
+    );
+
+    console.log("QR Response:", res.data);
+
+    if (res.data.qrImageBase64) {
+      setQrPreview(res.data.qrImageBase64);
+    } else {
+      alert("No QR returned from server.");
     }
-  };
+  } catch (err) {
+    console.error("Error generating QR:", err);
+    alert("Failed to generate QR. Check backend logs.");
+  }
+};
 
   // ✅ Download QR
   const handleDownload = () => {

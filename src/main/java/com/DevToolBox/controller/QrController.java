@@ -23,16 +23,17 @@ import jakarta.servlet.http.HttpSession;
 @RestController
 @RequestMapping("/api/qr")
 public class QrController {
+
     private final Cloudinary cloudinary;
-     private final UsagesDAO usage;
-    public QrController(Cloudinary cloudinary,UsagesDAO usage) {
+    private final UsagesDAO usage;
+
+    public QrController(Cloudinary cloudinary, UsagesDAO usage) {
         this.cloudinary = cloudinary;
-        this.usage=usage;
+        this.usage = usage;
     }
 
     /**
-     * POST /api/qr
-     * Accepts text + optional file, uploads file to Cloudinary,
+     * POST /api/qr Accepts text + optional file, uploads file to Cloudinary,
      * generates QR (Base64), and returns JSON.
      */
     @PostMapping(
@@ -41,9 +42,10 @@ public class QrController {
     )
     public ResponseEntity<Map<String, Object>> makeQr(
             @RequestParam(name = "text", required = false) String text,
-            @RequestParam(name = "file", required = false) MultipartFile file,HttpSession session
+            @RequestParam(name = "file", required = false) MultipartFile file, HttpSession session
     ) {
         String fileUrl = null;
+        System.out.println("SESSION USERNAME: " + session.getAttribute("Name"));
 
         // 1. Upload file to Cloudinary if provided
         if (file != null && !file.isEmpty()) {
@@ -90,16 +92,15 @@ public class QrController {
         if (fileUrl != null) {
             out.put("fileUrl", fileUrl);
         }
-        try{
-        usage.saveUsage((String)session.getAttribute("Name"), "QR Code Generator");
-        }catch(Exception e){
-            System.out.println("failed to catch log");
+        String userName = (String) session.getAttribute("Name");
+        if (userName != null) {
+            usage.saveUsage(userName, "QR Code Generator");
         }
+
         return ResponseEntity.ok(out);
     }
 
     // ========== helpers ==========
-
     private static byte[] generateQrPng(String content, int size) {
         try {
             var hints = new EnumMap<EncodeHintType, Object>(EncodeHintType.class);

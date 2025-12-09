@@ -20,14 +20,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 @Configuration
 @EnableTransactionManagement
 @ComponentScan(basePackages = {
-        // scan BOTH variants until you make everything lowercase
-        "com.devtoolbox",      // e.g., model, controller, service, dao (lowercase)
-        "com.DevToolBox"       // existing config/controller package
+    // scan BOTH variants until you make everything lowercase
+    "com.devtoolbox", // e.g., model, controller, service, dao (lowercase)
+    "com.DevToolBox" // existing config/controller package
 })
 public class AppConfig {
 
     // ---------- DataSource (HikariCP) ----------
-     @Bean(destroyMethod = "close")
+    @Bean(destroyMethod = "close")
     @Primary
     public DataSource dataSource() {
         HikariDataSource ds = new HikariDataSource();
@@ -41,8 +41,9 @@ public class AppConfig {
         ds.setMinimumIdle(2);
         return ds;
     }
-    @Bean(name={"tem"})
-    public JdbcTemplate jdbcTemplate(DataSource datasoucre){
+
+    @Bean(name = {"tem"})
+    public JdbcTemplate jdbcTemplate(DataSource datasoucre) {
         return new JdbcTemplate(datasoucre);
     }
 
@@ -85,14 +86,16 @@ public class AppConfig {
         JavaMailSenderImpl s = new JavaMailSenderImpl();
         s.setHost(getEnv("MAIL_HOST", "smtp.gmail.com"));
         s.setPort(Integer.parseInt(getEnv("MAIL_PORT", "587")));
-        s.setUsername(getEnv("MAIL_USER", "your@gmail.com"));
-        s.setPassword(getEnv("MAIL_PASS", "app_password"));
+        s.setUsername(getEnv("MAIL_USER", "librarysystemxyz@gmail.com"));
+        s.setPassword(getEnv("MAIL_PASS", null));
+
+        System.out.println("[MAIL DEBUG] MAIL_USER=" + System.getenv("MAIL_USER") + "  MAIL_PASS_SET=" + System.getenv("MAIL_PASS"));
 
         var props = s.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.debug", "false");
+        props.put("mail.debug", "true");
         return s;
     }
 
