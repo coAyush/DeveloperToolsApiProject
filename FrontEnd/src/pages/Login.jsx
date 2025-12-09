@@ -4,36 +4,52 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const API_BASE = "http://localhost:8080/DeveloperToolsApiProject/api/auth"; // ✅ backend base URL
+// ✅ Corrected backend base URL
+const API_BASE = "http://localhost:8080/api/auth";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Escape key → go back
+  // 🔐 Auto sign-in if session active
   useEffect(() => {
-    const handleKeyDown = (e) => e.key === "Escape" && navigate(-1);
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    fetch(`${API_BASE}/me`, { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.authenticated) {
+          toast.success("You're already logged in!");
+          navigate("/home");
+        }
+      })
+      .catch((err) => console.error("Session check error:", err));
   }, [navigate]);
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    try {
-      const { data } = await axios.post(`${API_BASE}/login`, form);
+    setLoading(true);
 
-      if (data.includes("successful")) {
-        toast.success("✅ Logged in successfully!");
+    try {
+      const { data } = await axios.post(`${API_BASE}/login`, form, {
+        withCredentials: true, // 🚀 required for session
+      });
+
+      // 🔥 Updated success check
+      if (data?.message === "Login successful!") {
+        toast.success("Logged in successfully!");
         setTimeout(() => navigate("/home"), 1200);
       } else {
-        toast.error(data || "Invalid credentials!");
+        toast.error(data?.message || "Invalid Credentials!");
       }
     } catch (err) {
       console.error(err);
-      toast.error("Login failed! Check backend connection.");
+      toast.error("Login failed! Server not responding.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -50,22 +66,25 @@ const Login = () => {
         <form className="space-y-5" onSubmit={handleLogin}>
           {/* Email */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email Address</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Email Address
+            </label>
             <input
               name="email"
               type="email"
               value={form.email}
               onChange={handleChange}
               placeholder="Enter your email"
-              className="w-full mt-1 p-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-800 placeholder-gray-400
-                         focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              className="w-full mt-1 p-3 border border-gray-300 rounded-lg bg-gray-50"
               required
             />
           </div>
 
           {/* Password */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Password</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Password
+            </label>
             <div className="relative">
               <input
                 name="password"
@@ -73,31 +92,29 @@ const Login = () => {
                 value={form.password}
                 onChange={handleChange}
                 placeholder="Enter your password"
-                className="w-full mt-1 p-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-800 placeholder-gray-400
-                           focus:outline-none focus:ring-2 focus:ring-blue-500 transition pr-10"
+                className="w-full mt-1 p-3 border border-gray-300 rounded-lg bg-gray-50 pr-10"
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
               >
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
-            </div>
-            <div className="text-right mt-2">
-              <a href="#" className="text-sm text-blue-600 hover:underline">
-                Forgot password?
-              </a>
             </div>
           </div>
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 
-                       hover:scale-[1.02] active:scale-[0.98] transition"
+            disabled={loading}
+            className={`w-full font-semibold py-3 rounded-lg text-white transition ${
+              loading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
+            }`}
           >
-            Sign In
+            {loading ? "Signing In..." : "Sign In"}
           </button>
         </form>
 
