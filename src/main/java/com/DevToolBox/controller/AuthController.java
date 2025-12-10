@@ -2,14 +2,20 @@ package com.DevToolBox.controller;
 
 import com.DevToolBox.Model.Users;
 import com.DevToolBox.Services.AuthService;
+import com.DevToolBox.dao.UserDao;
+import com.DevToolBox.Services.MailServiceImpl;
+import com.DevToolBox.util.PasswordUtil;
+import com.DevToolBox.util.OtpUtil;
 import jakarta.servlet.http.HttpSession;
+
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
-// Matches your axios base: http://localhost:8080/api/auth
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -17,115 +23,119 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
-    // ----- DTOs for clean JSON binding -----
-    public static class SignupRequest {
+    @Autowired
+    private UserDao userDao;
 
-        public String name;
-        public String email;
-        public String password;
+    @Autowired
+    private MailServiceImpl mailService;
 
-        public SignupRequest() {
-        }
+    @Autowired
+    private PasswordUtil passwordUtil;
 
-        public String getName() {
-            return name;
-        }
+    // Store OTP temporarily in memory
+    private final Map<String, String> otpStore = new ConcurrentHashMap<>();
 
-        public String getEmail() {
-            return email;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public void setEmail(String email) {
-            this.email = email;
-        }
-
-        public void setPassword(String password) {
-            this.password = password;
-        }
+    // ================= SIGNUP =====================
+    @PostMapping(value = "/signup", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> signup(@RequestBody Map<String, String> req) {
+        return ResponseEntity.ok(authService.signup(req.get("name"), req.get("email"), req.get("password")));
     }
 
-    public static class LoginRequest {
+    // ================= LOGIN ======================
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody Map<String, String> req, HttpSession session) {
 
-        public String email;
-        public String password;
-
-        public LoginRequest() {
-        }
-
-        public String getEmail() {
-            return email;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        public void setEmail(String email) {
-            this.email = email;
-        }
-
-        public void setPassword(String password) {
-            this.password = password;
-        }
-    }
-
-    // ----- Endpoints -----
-    @PostMapping(value = "/signup", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
-    public String signup(@RequestBody SignupRequest req) {
-        return authService.signup(req.name, req.email, req.password);
-    }
-
-    @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public Map<String, Object> login(@RequestBody LoginRequest req, HttpSession session) {
-
-        Map<String, Object> m = authService.login(req.email, req.password);
-        Map<String, Object> response = new HashMap<>();
-
+        Map<String, Object> m = authService.login(req.get("email"), req.get("password"));
         if (m.containsKey("User")) {
             Users u = (Users) m.get("User");
             session.setAttribute("Name", u.getName());
             session.setAttribute("Email", u.getEmail());
-            System.out.println((String) session.getAttribute("Name"));
 
-            response.put("message", "Login successful!");
-            response.put("name", u.getName());
-            response.put("email", u.getEmail());
-            return response;
-
-        } else {
-            response.put("message", "Login not successful!");
+            return ResponseEntity.ok(Map.of(
+                    "message", "Login successful!",
+                    "name", u.getName(),
+                    "email", u.getEmail()
+            ));
         }
-        return response;
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("message", "Invalid Credentials!"));
     }
 
-    @GetMapping(value = "/me", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Map<String, Object> getUser(HttpSession session) {
+    // ================= SESSION CHECK ======================
+    @GetMapping("/me")
+    public ResponseEntity<?> getUser(HttpSession session) {
         String name = (String) session.getAttribute("Name");
         String email = (String) session.getAttribute("Email");
 
-        if (name == null || email == null) {
-            return Map.of("authenticated", false);
-        }
+        if (name == null || email == null)
+            return ResponseEntity.ok(Map.of("authenticated", false));
 
-        return Map.of(
+        return ResponseEntity.ok(Map.of(
                 "authenticated", true,
                 "name", name,
                 "email", email
-        );
+        ));
     }
 
+    // ================= OTP - REQUEST ======================
+    @PostMapping("/request-otp")
+    public ResponseEntity<?> requestOtp(@RequestBody Map<String, String> req) {
+
+        String email = req.get("email");
+
+        Users user = userDao.getUserByEmail(email);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "Email not registered"));
+        }
+
+        String otp = OtpUtil.generateOtp();
+        otpStore.put(email, otp);
+
+        mailService.sendMail(email, "Password Reset OTP", "Your OTP is: " + otp);
+
+        return ResponseEntity.ok(Map.of("message", "OTP sent to your email"));
+    }
+
+    // ================= OTP - VERIFY ======================
+    @PostMapping("/verify-otp")
+    public ResponseEntity<?> verifyOtp(@RequestBody Map<String, String> req) {
+
+        String email = req.get("email");
+        String otp = req.get("otp");
+
+        String correctOtp = otpStore.get(email);
+
+        return correctOtp != null && correctOtp.equals(otp)
+                ? ResponseEntity.ok(Map.of("valid", true))
+                : ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("valid", false, "message", "Invalid OTP"));
+    }
+
+    // ================= PASSWORD RESET ======================
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> req) {
+
+        String email = req.get("email");
+        String newPassword = req.get("newPassword");
+
+        String hashed = passwordUtil.hashPassword(newPassword);
+        int updated = userDao.updatePassword(email, hashed);
+
+        if (updated > 0) {
+            otpStore.remove(email);
+            return ResponseEntity.ok(Map.of("message", "Password updated successfully"));
+        }
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("message", "Update failed"));
+    }
+
+    // ================= LOGOUT ======================
     @PostMapping("/logout")
-    public Map<String, Object> logout(HttpSession session) {
+    public ResponseEntity<?> logout(HttpSession session) {
         session.invalidate();
-        return Map.of("message", "Logged out successfully!");
+        return ResponseEntity.ok(Map.of("message", "Logged out successfully!"));
     }
 }

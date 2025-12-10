@@ -10,7 +10,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class UserDao {
 
-    // you created a bean named "tem" in AppConfig
     @Autowired
     @Qualifier("tem")
     private JdbcTemplate jdbcTemplate;
@@ -35,5 +34,14 @@ public class UserDao {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public Users getUserByEmail(String email) {
+        return findByEmail(email);
+    }
+
+    public int updatePassword(String email, String hashedPassword) {
+        String sql = "UPDATE users SET password = ? WHERE email = ?";
+        return jdbcTemplate.update(sql, hashedPassword, email);
     }
 }
