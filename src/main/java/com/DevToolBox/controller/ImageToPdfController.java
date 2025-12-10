@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import com.DevToolBox.Services.UsageLogger;
+import jakarta.servlet.http.HttpSession;
 
 /**
  *
@@ -28,17 +30,20 @@ public class ImageToPdfController {
 
     @Autowired
     private ImageToPdf service;
+    @Autowired
+    private UsageLogger usageLogger;
 
-     
     @PostMapping("/single")
-    public void ImageToPdfSingle(@RequestParam("file") MultipartFile file, HttpServletResponse response) throws Exception {
+    public void ImageToPdfSingle(@RequestParam("file") MultipartFile file, HttpServletResponse response, HttpSession session) throws Exception {
+        usageLogger.log(session, "Image to PDF");
         response.setContentType(MediaType.APPLICATION_PDF_VALUE);
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=image.pdf");
         service.convertSingle(file.getInputStream(), response.getOutputStream());
     }
 
     @PostMapping("/multiple")
-    public void ImageToPdfMultiple(@RequestParam("files") MultipartFile[] files, HttpServletResponse response) throws Exception {
+    public void ImageToPdfMultiple(@RequestParam("files") MultipartFile[] files,HttpSession session, HttpServletResponse response) throws Exception {
+        usageLogger.log(session, "Image to PDF");
         response.setContentType(MediaType.APPLICATION_PDF_VALUE);
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=images.pdf");
 

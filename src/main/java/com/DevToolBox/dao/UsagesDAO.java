@@ -4,6 +4,7 @@ import com.DevToolBox.Model.Usages;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -12,33 +13,39 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class UsagesDAO {
 
-    private final JdbcTemplate jdbc;
-    // Constructor injection — preferred and testable
+    public final JdbcTemplate jdbc;
+
     public UsagesDAO(JdbcTemplate jdbc) {
         this.jdbc = jdbc;
     }
 
-    // Save a usage record; returns rows affected (1 on success)
+    // Insert usage log
     public int saveUsage(String username, String api) {
         String sql = "INSERT INTO usages (username, api) VALUES (?, ?)";
         return jdbc.update(sql, username, api);
     }
 
-    // Return all usage rows (optional)
-    public List<Usages> findAll() {
-        String sql = "SELECT id, username, api FROM usages ORDER BY id DESC";
-        return jdbc.query(sql, new UsageRowMapper());
+    // History only for a specific user
+    public List<Usages> findByUsername(String username) {
+        String sql = "SELECT id, username, api FROM usages WHERE username = ? ORDER BY id DESC";
+        return jdbc.query(sql, new UsageRowMapper(), username);
     }
 
-    // Aggregated counts per API for a user (for pie chart)
+    // Count stats for one user (pie chart)
     public List<ApiCount> getApiCountsByUser(String username) {
-        String sql = "SELECT api, COUNT(*) AS cnt FROM usages WHERE username = ? GROUP BY api";
+        String sql = "SELECT api, COUNT(*) AS cnt FROM usages WHERE username = ? GROUP BY api ORDER BY cnt DESC";
         return jdbc.query(sql, new Object[]{username}, (rs, rowNum) ->
-            new ApiCount(rs.getString("api"), rs.getInt("cnt"))
+                new ApiCount(rs.getString("api"), rs.getInt("cnt"))
         );
     }
 
-    // RowMapper for Usages POJO
+    // Global stats for bar chart
+    public List<Map<String, Object>> getGlobalUsageStats() {
+        String sql = "SELECT api, COUNT(*) AS cnt FROM usages GROUP BY api ORDER BY cnt DESC";
+        return jdbc.queryForList(sql);
+    }
+
+    // --- Mappers ---
     private static class UsageRowMapper implements RowMapper<Usages> {
         @Override
         public Usages mapRow(ResultSet rs, int rowNum) throws SQLException {

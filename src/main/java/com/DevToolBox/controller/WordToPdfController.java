@@ -4,16 +4,21 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
+import com.DevToolBox.Services.UsageLogger;
+import jakarta.servlet.http.HttpSession;
 import fr.opensagres.poi.xwpf.converter.pdf.PdfConverter;
 import fr.opensagres.poi.xwpf.converter.pdf.PdfOptions;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @RestController
 @RequestMapping("/convert")
 public class WordToPdfController {
-
+    @Autowired
+    UsageLogger usageLogger;
     @PostMapping
-    public ResponseEntity<byte[]> wordToPdf(@RequestParam("file") MultipartFile doc) {
+    public ResponseEntity<byte[]> wordToPdf(@RequestParam("file") MultipartFile doc,HttpSession session) {
+         usageLogger.log(session, "Word to PDF");
         try (InputStream in = doc.getInputStream(); 
                 XWPFDocument xwpf = new XWPFDocument(in); 
                 ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
@@ -30,7 +35,7 @@ public class WordToPdfController {
                             .filename("converted.pdf")
                             .build()
             );
-
+           
             return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
 
         } catch (Exception e) {

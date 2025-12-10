@@ -5,7 +5,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
+import com.DevToolBox.Services.UsageLogger;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @CrossOrigin(origins = "*") // for local dev; lock this down in production
 public class UrlController {
 
+    @Autowired
+    UsageLogger usageLogger;
     HttpServletRequest request;
     private final UrlService urlService;
 
@@ -38,12 +41,14 @@ public class UrlController {
     }
 
     @PostMapping("/shorten")
-    public ResponseEntity shorten(@RequestBody Map<String, String> body) {
+    public ResponseEntity shorten(@RequestBody Map<String, String> body,HttpSession session) {
         // urlService.shortenUrl should accept (originalUrl, alias) where alias may be null/blank
+        usageLogger.log(session,"Url api");
         System.out.println("controller working");
         String originalUrl = body.get("url");
         String alias = body.get("alias");
         try {
+           
             String code = urlService.shortenUrl(originalUrl, alias);
             String host = getHost(); // e.g., http://localhost:8080 or https://yourdomain
             String shortUrl = host + "/api/url/" + code;
