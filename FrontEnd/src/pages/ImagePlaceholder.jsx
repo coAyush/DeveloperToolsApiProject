@@ -100,14 +100,25 @@ export default function ImagePlaceholder() {
     setFg(nf === nb ? "#111827" : nf);
   };
 
-  const download = () => {
-    const a = document.createElement("a");
-    const mime = format === "png" ? "image/png" : "image/jpeg";
-    const quality = format === "jpeg" ? 0.92 : 1;
-    a.href = canvasRef.current.toDataURL(mime, quality);
-    a.download = safeName;
-    a.click();
-  };
+ const download = async () => {
+  const a = document.createElement("a");
+  const mime = format === "png" ? "image/png" : "image/jpeg";
+  const quality = format === "jpeg" ? 0.92 : 1;
+  a.href = canvasRef.current.toDataURL(mime, quality);
+  a.download = safeName;
+  a.click();
+
+  // 🔥 Track usage in backend after download
+  try {
+    await fetch("http://localhost:8080/DeveloperToolsApiProject/api/usage/track?tool=Image Placeholder", {
+      method: "POST",
+      credentials: "include"
+    });
+  } catch (err) {
+    console.error("Failed to track usage", err);
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 via-blue-50 to-gray-100 px-6 py-24 flex flex-col items-center">
