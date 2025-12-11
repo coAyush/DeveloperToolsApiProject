@@ -15,7 +15,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/url")
-@CrossOrigin(origins = "*") // for local dev; lock this down in production
 public class UrlController {
 
     @Autowired

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
-  Link2,
   Scissors,
   Copy,
   ExternalLink,
@@ -10,11 +9,17 @@ import {
   Loader2,
 } from "lucide-react";
 
-const API_BASE = "http://localhost:8080/DeveloperToolsApiProject/api"; // ← keep as-is
+/**
+ * Keep this matching your backend context path
+ * (you used DeveloperToolsApiProject earlier)
+ */
+const API_BASE = "http://localhost:8080/DeveloperToolsApiProject/api";
 
 const isValidUrl = (value) => {
+  if (!value) return false;
   try {
-    const u = new URL(value);
+    // ensure trimmed value is a proper URL
+    const u = new URL(value.trim());
     return !!u.protocol && !!u.host;
   } catch {
     return false;
@@ -27,15 +32,13 @@ const UrlShortener = () => {
   const [result, setResult] = useState(null); // { shortUrl, code? }
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
+  const [copyMsg, setCopyMsg] = useState(""); // small feedback
   const navigate = useNavigate();
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === "Escape") {
-        navigate(-1); // go back to previous page
-      }
+      if (e.key === "Escape") navigate(-1);
     };
-
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [navigate]);
@@ -43,13 +46,14 @@ const UrlShortener = () => {
   const handleShorten = async () => {
     setErr("");
     setResult(null);
+    setCopyMsg("");
 
-    if (!isValidUrl(longUrl)) {
+    const urlValue = longUrl.trim();
+    if (!isValidUrl(urlValue)) {
       setErr("Please enter a valid URL (including http:// or https://).");
       return;
     }
 
-    // Optional client-side alias validation to avoid easy 409s
     const trimmedAlias = alias.trim();
     if (trimmedAlias && !/^[A-Za-z0-9_-]{1,64}$/.test(trimmedAlias)) {
       setErr("Alias can contain letters, numbers, _ and - only (max 64).");
@@ -57,31 +61,40 @@ const UrlShortener = () => {
     }
 
     setLoading(true);
+
     try {
-      const payload = { url: longUrl };
+      const payload = { url: urlValue };
       if (trimmedAlias) payload.alias = trimmedAlias;
 
       const { data } = await axios.post(`${API_BASE}/url/shorten`, payload, {
         headers: { "Content-Type": "application/json" },
+        withCredentials: true, // uncomment if your backend needs session cookie
       });
 
-      // ✅ Backend returns JSON: { shortUrl, code }
+      // backend returns { shortUrl, code } (preferred)
       if (data && typeof data === "object" && data.shortUrl) {
         setResult({ shortUrl: data.shortUrl, code: data.code ?? null });
-      } else if (typeof data === "string") {
-        // Fallback if backend ever returns just a code
-        const shortUrl = `${window.location.origin}/api/url/${data}`;
-        setResult({ shortUrl, code: data });
+      } else if (data && typeof data === "object" && data.code) {
+        // backend returned only code => construct full short URL
+        const host = window.location.origin;
+        setResult({ shortUrl: `${host}/api/url/${data.code}`, code: data.code });
+      } else if (typeof data === "string" && data.length > 0) {
+        const host = window.location.origin;
+        setResult({ shortUrl: `${host}/api/url/${data}`, code: data });
       } else {
-        setErr("Invalid response received from the server.");
+        setErr("Invalid response from server.");
       }
     } catch (e) {
       console.error(e);
-      setErr(
+      // prefer backend message if present
+      const backendMsg =
         e?.response?.data?.message ||
-          e?.response?.data ||
-          "Failed to shorten URL. Check backend and network."
-      );
+        (typeof e?.response?.data === "string" ? e.response.data : null);
+
+      if (backendMsg) setErr(backendMsg);
+      else if (e?.response?.status === 409)
+        setErr("Alias already in use — choose another one.");
+      else setErr("Failed to shorten URL. Check backend / network.");
     } finally {
       setLoading(false);
     }
@@ -91,14 +104,16 @@ const UrlShortener = () => {
     if (!result?.shortUrl) return;
     try {
       await navigator.clipboard.writeText(result.shortUrl);
-      // quick visual hint using focus ring:
+      setCopyMsg("Copied!");
+      setTimeout(() => setCopyMsg(""), 1200);
       const el = document.getElementById("short-url");
       if (el) {
         el.classList.add("ring-2", "ring-cyan-400");
         setTimeout(() => el.classList.remove("ring-2", "ring-cyan-400"), 650);
       }
     } catch {
-      // ignore clipboard errors
+      setCopyMsg("Copy failed");
+      setTimeout(() => setCopyMsg(""), 1200);
     }
   };
 
@@ -109,41 +124,34 @@ const UrlShortener = () => {
       </h1>
 
       <div className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-lg transform transition-all hover:scale-[1.02] hover:shadow-2xl space-y-6">
-        {/* Long URL */}
         <div>
-          {/* <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Long URL
-          </label> */}
           <div className="flex items-center gap-3">
-            {/* <Link2 className="text-blue-500" size={20} /> */}
             <input
               type="url"
-              placeholder="Enter your long URL"
+              inputMode="url"
+              placeholder="Enter your long URL (include http:// or https://)"
               value={longUrl}
               onChange={(e) => setLongUrl(e.target.value)}
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none transition-all hover:border-blue-400"
+              aria-label="Long URL"
             />
           </div>
         </div>
 
-        {/* Optional custom alias */}
         <div>
-          {/* <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Custom Alias (optional)
-          </label> */}
           <input
             type="text"
             placeholder="Custom alias (optional)"
             value={alias}
             onChange={(e) => setAlias(e.target.value)}
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none transition-all hover:border-blue-400"
+            aria-label="Custom alias"
           />
           <p className="text-xs text-gray-500 mt-1">
             Use letters, numbers, _ or - (max 64). Leave empty for random.
           </p>
         </div>
 
-        {/* Error */}
         {err && (
           <div className="flex items-start gap-2 rounded-lg bg-red-50 border border-red-200 p-3">
             <AlertCircle className="text-red-500 mt-[2px]" size={18} />
@@ -151,28 +159,23 @@ const UrlShortener = () => {
           </div>
         )}
 
-        {/* Actions */}
         <div className="flex justify-center">
           <button
             onClick={handleShorten}
-            disabled={!longUrl || loading}
+            disabled={!longUrl.trim() || loading}
             className={`px-6 py-3 rounded-lg font-semibold text-white shadow-md transition-all flex items-center gap-2
               ${
-                longUrl && !loading
+                longUrl.trim() && !loading
                   ? "bg-gradient-to-r from-blue-600 to-cyan-400 hover:scale-105 hover:shadow-lg active:scale-95 cursor-pointer"
                   : "bg-gray-400 cursor-not-allowed"
               }`}
+            aria-disabled={!longUrl.trim() || loading}
           >
-            {loading ? (
-              <Loader2 className="animate-spin" size={18} />
-            ) : (
-              <Scissors size={18} />
-            )}
+            {loading ? <Loader2 className="animate-spin" size={18} /> : <Scissors size={18} />}
             {loading ? "Shortening..." : "Shorten"}
           </button>
         </div>
 
-        {/* Result */}
         {result?.shortUrl && (
           <div className="mt-4 border border-gray-200 rounded-lg p-4 bg-gray-50">
             <p className="text-sm text-gray-600 mb-2">Your shortened URL</p>
@@ -182,6 +185,7 @@ const UrlShortener = () => {
                 readOnly
                 value={result.shortUrl}
                 className="w-full p-3 rounded-lg bg-white border border-gray-300 text-gray-900"
+                aria-label="Shortened URL"
               />
               <button
                 onClick={handleCopy}
@@ -190,7 +194,8 @@ const UrlShortener = () => {
               >
                 <Copy size={18} />
               </button>
-              {/* <a
+
+              <a
                 href={result.shortUrl}
                 target="_blank"
                 rel="noreferrer"
@@ -198,14 +203,19 @@ const UrlShortener = () => {
                 title="Open"
               >
                 <ExternalLink size={18} />
-              </a> */}
+              </a>
             </div>
 
-            {result.code && (
-              <p className="text-xs text-gray-500 mt-2">
-                Code: <span className="font-mono">{result.code}</span>
-              </p>
-            )}
+            <div className="flex items-center justify-between mt-2">
+              {result.code ? (
+                <p className="text-xs text-gray-500">
+                  Code: <span className="font-mono">{result.code}</span>
+                </p>
+              ) : (
+                <div />
+              )}
+              <p className="text-xs text-green-600">{copyMsg}</p>
+            </div>
           </div>
         )}
       </div>
