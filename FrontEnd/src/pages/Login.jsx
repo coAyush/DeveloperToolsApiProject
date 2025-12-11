@@ -100,6 +100,17 @@ const Login = () => {
             </div>
           </div>
 
+          {/* ⭐ Added Forgot Password Link */}
+          <p className="text-right -mt-3">
+            <a
+              href="/forgot"
+              className="text-blue-600 text-sm hover:underline"
+              
+            >
+              Forgot Password?
+            </a>
+          </p>
+
           <button
             type="submit"
             disabled={loading}
