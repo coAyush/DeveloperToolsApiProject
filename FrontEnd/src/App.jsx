@@ -1,9 +1,11 @@
+// src/App.jsx
 import { Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Intro from "./pages/Intro";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
+import ForgotPassword from "./pages/ForgotPassword";
 import Home from "./pages/Home";
 import QrTool from "./pages/QrTool";
 import PasswordGen from "./pages/PasswordGen";
@@ -34,7 +36,13 @@ const PrivateLayout = ({ children }) => {
 
 function GlobalChat() {
   const { pathname } = useLocation();
-  const HIDE_ON = ["/login", "/signup", "/"]; // add "/" if you want to hide on Intro too
+  const HIDE_ON = [
+    "/login",
+    "/signup",
+    "/",
+    "/forgot",
+    "/reset-password", // hide on forgot/reset too
+  ];
   if (HIDE_ON.includes(pathname)) return null;
   return <ChatWidget />;
 }
@@ -44,131 +52,26 @@ const App = () => {
     <>
       <Routes>
         {/* Public pages */}
-        <Route
-          path="/"
-          element={
-            <PublicLayout>
-              <Intro />
-            </PublicLayout>
-          }
-        />
-        <Route
-          path="/login"
-          element={
-            <PublicLayout>
-              <Login />
-            </PublicLayout>
-          }
-        />
-        <Route
-          path="/signup"
-          element={
-            <PublicLayout>
-              <SignUp />
-            </PublicLayout>
-          }
-        />
+        <Route path="/" element={<PublicLayout><Intro /></PublicLayout>} />
+        <Route path="/login" element={<PublicLayout><Login /></PublicLayout>} />
+        <Route path="/signup" element={<PublicLayout><SignUp /></PublicLayout>} />
+        <Route path="/forgot" element={<PublicLayout><ForgotPassword /></PublicLayout>} />
 
         {/* Private pages (after login) */}
-        <Route
-          path="/home"
-          element={
-            <PrivateLayout>
-              <Home />
-            </PrivateLayout>
-          }
-        />
-        <Route
-          path="/tools/word-to-pdf"
-          element={
-            <PrivateLayout>
-              <WordToPdf />
-            </PrivateLayout>
-          }
-        />
-        <Route
-          path="/tools/img-to-pdf"
-          element={
-            <PrivateLayout>
-              <ImageToPdf />
-            </PrivateLayout>
-          }
-        />
-        <Route
-          path="/tools/pdf-compressor"
-          element={
-            <PrivateLayout>
-              <PdfCompressor />
-            </PrivateLayout>
-          }
-        />
-        <Route
-          path="/about"
-          element={
-            <PrivateLayout>
-              <About />
-            </PrivateLayout>
-          }
-        />
-        <Route
-          path="/contact"
-          element={
-            <PrivateLayout>
-              <Contact />
-            </PrivateLayout>
-          }
-        />
+        <Route path="/home" element={<PrivateLayout><Home /></PrivateLayout>} />
+        <Route path="/tools/word-to-pdf" element={<PrivateLayout><WordToPdf /></PrivateLayout>} />
+        <Route path="/tools/img-to-pdf" element={<PrivateLayout><ImageToPdf /></PrivateLayout>} />
+        <Route path="/tools/pdf-compressor" element={<PrivateLayout><PdfCompressor /></PrivateLayout>} />
+        <Route path="/about" element={<PrivateLayout><About /></PrivateLayout>} />
+        <Route path="/contact" element={<PrivateLayout><Contact /></PrivateLayout>} />
 
-        {/* Future Tools  */}
-
-        <Route
-          path="/tools/qr"
-          element={
-            <PrivateLayout>
-              <QrTool />
-            </PrivateLayout>
-          }
-        />
-        <Route
-          path="/tools/url"
-          element={
-            <PrivateLayout>
-              <UrlShortener />
-            </PrivateLayout>
-          }
-        />
-        <Route
-          path="/tools/password"
-          element={
-            <PrivateLayout>
-              <PasswordGen />
-            </PrivateLayout>
-          }
-        />
-        <Route
-          path="/tools/uuid"
-          element={
-            <PrivateLayout>
-              <UuidGenerator />
-            </PrivateLayout>
-          }
-        />
-        <Route
-          path="/tools/placeholder"
-          element={
-            <PrivateLayout>
-              <ImagePlaceholder />
-            </PrivateLayout>
-          }
-        />
-        <Route
-          path="/r/:code"
-          element={
-            <PrivateLayout>
-              <Redirector />
-            </PrivateLayout>
-          }
-        />
+        {/* Tools */}
+        <Route path="/tools/qr" element={<PrivateLayout><QrTool /></PrivateLayout>} />
+        <Route path="/tools/url" element={<PrivateLayout><UrlShortener /></PrivateLayout>} />
+        <Route path="/tools/password" element={<PrivateLayout><PasswordGen /></PrivateLayout>} />
+        <Route path="/tools/uuid" element={<PrivateLayout><UuidGenerator /></PrivateLayout>} />
+        <Route path="/tools/placeholder" element={<PrivateLayout><ImagePlaceholder /></PrivateLayout>} />
+        <Route path="/r/:code" element={<PrivateLayout><Redirector /></PrivateLayout>} />
       </Routes>
 
       <GlobalChat />
