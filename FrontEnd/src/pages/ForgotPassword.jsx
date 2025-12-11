@@ -1,65 +1,165 @@
-import { useState, useEffect } from "react";
-import toast from "react-hot-toast";
+import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate, Link } from "react-router-dom";
+import toast from "react-hot-toast";
 
-const API_AUTH_BASE = "http://localhost:8080/DeveloperToolsApiProject/api/auth";
+const API = "http://localhost:8080/DeveloperToolsApiProject/api/auth";
 
-const ForgotPassword = () => {
+export default function ForgotPasswordFlow() {
+  const [step, setStep] = useState("forgot"); // forgot | verify | reset
   const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
-  // Escape key -> go back
-  useEffect(() => {
-    const handler = (e) => e.key === "Escape" && navigate(-1);
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [navigate]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // ============================
+  // 1️⃣ SEND OTP
+  // ============================
+  const sendOtp = async () => {
     setLoading(true);
-
     try {
-      // keep using your auth forgot endpoint; adjust if backend path differs
-      const { data } = await axios.post(`${API_AUTH_BASE}/forgot`, { email }, { withCredentials: true });
-
-      // Success message
-      toast.success(data?.message || "OTP sent to your email!");
-      setTimeout(() => navigate("/reset-password", { state: { email } }), 900);
+      const { data } = await axios.post(
+        `${API}/request-otp`,
+        { email },
+        { withCredentials: true }
+      );
+      toast.success(data.message);
+      setStep("verify");
     } catch (err) {
-      console.error(err);
-      const msg = err?.response?.data?.message || "Email not found!";
-      toast.error(msg);
-    } finally {
-      setLoading(false);
+      toast.error(err?.response?.data?.message || "Failed to send OTP");
     }
+    setLoading(false);
   };
 
-  return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4">
-      <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg mt-20">
-        <h2 className="text-3xl font-bold text-center text-blue-600 mb-4">Forgot Password</h2>
-        <p className="text-center text-gray-600 mb-6">Enter your email to receive an OTP for password reset.</p>
+  // ============================
+  // 2️⃣ VERIFY OTP
+  // ============================
+  const verifyOtp = async () => {
+    setLoading(true);
+    try {
+      const { data } = await axios.post(
+        `${API}/verify-otp`,
+        { email, otp },
+        { withCredentials: true }
+      );
 
-        <form className="space-y-5" onSubmit={handleSubmit}>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Email Address</label>
-            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your registered email" className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50" />
-          </div>
+      if (data.valid) {
+        toast.success("OTP verified!");
+        setStep("reset");
+      }
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Invalid OTP");
+    }
+    setLoading(false);
+  };
 
-          <button type="submit" disabled={loading} className={`w-full py-3 text-white font-semibold rounded-lg ${loading ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"}`}>
-            {loading ? "Sending OTP..." : "Send OTP"}
-          </button>
-        </form>
+  // ============================
+  // 3️⃣ RESET PASSWORD
+  // ============================
+  const resetPassword = async () => {
+    setLoading(true);
+    try {
+      const { data } = await axios.post(
+        `${API}/reset-password`,
+        { email, newPassword: password },
+        { withCredentials: true }
+      );
 
-        <p className="text-center text-sm text-gray-600 mt-6">
-          Remember your password? <Link to="/login" className="text-blue-600 hover:underline">Login</Link>
-        </p>
+      toast.success(data.message);
+      setStep("done");
+    } catch (err) {
+      toast.error("Failed to update password");
+    }
+    setLoading(false);
+  };
+
+  // ---------------------------------------------------
+  // SCREEN 1: ENTER EMAIL (SEND OTP)
+  // ---------------------------------------------------
+  if (step === "forgot") {
+    return (
+      <div className="page">
+        <h1>Forgot Password</h1>
+
+        <input
+          type="email"
+          placeholder="Enter registered email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+        <button onClick={sendOtp} disabled={loading || !email}>
+          {loading ? "Sending..." : "Send OTP"}
+        </button>
       </div>
-    </div>
-  );
-};
+    );
+  }
 
-export default ForgotPassword;
+  // ---------------------------------------------------
+  // SCREEN 2: VERIFY OTP
+  // ---------------------------------------------------
+  if (step === "verify") {
+    return (
+      <div className="page">
+        <h1>Verify OTP</h1>
+
+        <p className="info">OTP sent to {email}</p>
+
+        <input
+          type="text"
+          placeholder="Enter 6-digit OTP"
+          value={otp}
+          onChange={(e) => setOtp(e.target.value)}
+        />
+
+        <button onClick={verifyOtp} disabled={loading || otp.length < 6}>
+          {loading ? "Verifying..." : "Verify OTP"}
+        </button>
+
+        <button className="back" onClick={() => setStep("forgot")}>
+          Go Back
+        </button>
+      </div>
+    );
+  }
+
+  // ---------------------------------------------------
+  // SCREEN 3: RESET PASSWORD
+  // ---------------------------------------------------
+  if (step === "reset") {
+    return (
+      <div className="page">
+        <h1>Reset Password</h1>
+
+        <input
+          type="password"
+          placeholder="Enter new password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        <button
+          onClick={resetPassword}
+          disabled={loading || password.trim().length < 4}
+        >
+          {loading ? "Updating..." : "Update Password"}
+        </button>
+      </div>
+    );
+  }
+
+  // ---------------------------------------------------
+  // SCREEN 4: DONE
+  // ---------------------------------------------------
+  if (step === "done") {
+    return (
+      <div className="page">
+        <h1>Password Updated Successfully</h1>
+        <p>You can now login using your new password.</p>
+
+        <button onClick={() => (window.location.href = "/login")}>
+          Go to Login
+        </button>
+      </div>
+    );
+  }
+}
