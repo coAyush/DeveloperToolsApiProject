@@ -16,6 +16,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RestController
 @RequestMapping("/api/url")
 public class UrlController {
+    private static final String PUBLIC_BASE_URL =
+    "https://expressible-supereffectively-emeline.ngrok-free.dev";
 
     @Autowired
     UsageLogger usageLogger;
@@ -49,8 +51,10 @@ public class UrlController {
         try {
            
             String code = urlService.shortenUrl(originalUrl, alias);
-            String host = getHost(); // e.g., http://localhost:8080 or https://yourdomain
-            String shortUrl = host + "/api/url/" + code;
+            String shortUrl = PUBLIC_BASE_URL 
+                + "/DeveloperToolsApiProject/api/url/" 
+                + code;
+
 
             return ResponseEntity
                     .status(HttpStatus.CREATED)

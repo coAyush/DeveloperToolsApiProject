@@ -210,11 +210,23 @@
         </dependency>
 
         <!-- PDF and Document Libraries -->
+        <!-- PDFBox 2.x for PDF rasterization -->
+        <!-- PDFBox 3.x (main library) -->
+        <!-- PDFBox 3.x -->
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
-            <version>3.0.2</version>
+            <version>3.0.1</version>
         </dependency>
+
+        <!-- Tools including PDFRenderer -->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox-tools</artifactId>
+            <version>3.0.1</version>
+        </dependency>
+
+
         <dependency>
             <groupId>org.docx4j</groupId>
             <artifactId>docx4j-core</artifactId>
