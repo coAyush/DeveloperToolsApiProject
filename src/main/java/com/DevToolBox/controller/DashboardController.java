@@ -41,20 +41,16 @@ public class DashboardController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/usage-summary")
-    public ResponseEntity<?> globalUsageSummary(HttpSession session) {
+   @GetMapping("/usage-summary")
+public ResponseEntity<?> globalUsageSummary() {
 
-        if (session.getAttribute("Name") == null) {
-            return ResponseEntity.status(401)
-                    .body(Map.of("authenticated", false, "message", "Not logged in"));
-        }
+    List<Map<String, Object>> stats = usagesDAO.getGlobalUsageStats();
 
-        List<Map<String, Object>> stats = usagesDAO.getGlobalUsageStats();
+    Map<String, Object> result = new HashMap<>();
+    result.put("authenticated", true);
+    result.put("stats", stats);
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("authenticated", true);
-        result.put("stats", stats);
+    return ResponseEntity.ok(result);
+}
 
-        return ResponseEntity.ok(result);
-    }
 }

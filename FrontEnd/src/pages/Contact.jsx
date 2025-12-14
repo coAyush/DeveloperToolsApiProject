@@ -4,11 +4,18 @@ import { Mail, Phone, MapPin } from "lucide-react";
 import axios from "axios";
 
 const Contact = () => {
-  const [formData, setFormData] = useState({ name: "", email: "", message: "" });
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -16,7 +23,16 @@ const Contact = () => {
     setLoading(true);
 
     try {
-      // await axios.post("http://localhost:8080/DeveloperToolsApiProject/api/contact", formData);
+      // ✅ ACTUAL API CALL (THIS WAS MISSING EARLIER)
+      await axios.post(
+        "http://localhost:8080/DeveloperToolsApiProject/api/contact",
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       toast.success("Message sent successfully!", {
         style: {
@@ -33,6 +49,7 @@ const Contact = () => {
         },
       });
 
+      // ✅ RESET FORM
       setFormData({ name: "", email: "", message: "" });
     } catch (error) {
       console.error(error);
@@ -46,12 +63,13 @@ const Contact = () => {
     <div className="min-h-screen bg-gradient-to-b from-gray-50 via-blue-50 to-gray-100 px-6 pt-24 pb-16 flex justify-center">
       <Toaster position="bottom-right" reverseOrder={false} />
 
-      {/* 🟦 Medium Sized Card */}
+      {/* 🟦 Contact Card */}
       <div className="bg-white shadow-xl rounded-2xl p-8 md:p-10 max-w-xl w-full">
         {/* Heading */}
         <h1 className="text-3xl md:text-4xl font-extrabold text-center bg-gradient-to-r from-blue-600 to-cyan-400 bg-clip-text text-transparent mb-4">
           Contact Us
         </h1>
+
         <p className="text-center text-gray-600 mb-6 text-sm md:text-base">
           We'd love to hear from you! Fill out the form below and we'll get back to you soon.
         </p>
@@ -60,15 +78,21 @@ const Contact = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6 text-center">
           <div className="flex flex-col items-center">
             <Mail className="text-blue-500 mb-2" />
-            <p className="text-gray-700 text-xs md:text-sm">devtoolbox@example.com</p>
+            <p className="text-gray-700 text-xs md:text-sm">
+              librarysystemxyz@gmail.com
+            </p>
           </div>
           <div className="flex flex-col items-center">
             <Phone className="text-blue-500 mb-2" />
-            <p className="text-gray-700 text-xs md:text-sm">+91 00000 00000</p>
+            <p className="text-gray-700 text-xs md:text-sm">
+              +91 00000 00000
+            </p>
           </div>
           <div className="flex flex-col items-center">
             <MapPin className="text-blue-500 mb-2" />
-            <p className="text-gray-700 text-xs md:text-sm">Kolkata, India</p>
+            <p className="text-gray-700 text-xs md:text-sm">
+              Kolkata, India
+            </p>
           </div>
         </div>
 
@@ -83,6 +107,7 @@ const Contact = () => {
             required
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
           />
+
           <input
             type="email"
             name="email"
@@ -92,6 +117,7 @@ const Contact = () => {
             required
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
           />
+
           <textarea
             name="message"
             rows="4"
@@ -102,7 +128,7 @@ const Contact = () => {
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
           ></textarea>
 
-          {/* Buttons */}
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}
