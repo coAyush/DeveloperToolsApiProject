@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import ForgotPassword from "./pages/ForgotPassword";
 import Home from "./pages/Home";
+import Profile from "./pages/Profile";
 import QrTool from "./pages/QrTool";
 import PasswordGen from "./pages/PasswordGen";
 import UrlShortener from "./pages/UrlShortener";
@@ -63,6 +64,7 @@ const App = () => {
         <Route path="/tools/img-to-pdf" element={<PrivateLayout><ImageToPdf /></PrivateLayout>} />
         <Route path="/tools/pdf-compressor" element={<PrivateLayout><PdfCompressor /></PrivateLayout>} />
         <Route path="/about" element={<PrivateLayout><About /></PrivateLayout>} />
+        <Route path="/profile" element={<PrivateLayout><Profile/></PrivateLayout>} />
         <Route path="/contact" element={<PrivateLayout><Contact /></PrivateLayout>} />
 
         {/* Tools */}
