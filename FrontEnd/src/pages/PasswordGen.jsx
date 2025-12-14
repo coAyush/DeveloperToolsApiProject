@@ -52,6 +52,8 @@ const PasswordGen = () => {
     toast.success("📋 Password copied to clipboard!");
   };
 
+  
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-cyan-50 px-6 py-20">
       {/* ✅ Local Toaster removed, global App.js wala kaam karega */}

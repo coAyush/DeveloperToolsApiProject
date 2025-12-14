@@ -57,7 +57,7 @@ const Footer = () => {
           {/* Quick Links */}
           <div className="flex flex-col space-y-2 text-sm">
             <h3 className="font-semibold text-gray-700">Quick Links</h3>
-            <Link to="/" className="hover:text-blue-600 transition">Home</Link>
+            <Link to="/home" className="hover:text-blue-600 transition">Home</Link>
             <Link to="/about" className="hover:text-blue-600 transition">About</Link>
             <Link to="/contact" className="hover:text-blue-600 transition">Contact</Link>
             <Link to="/tools" className="hover:text-blue-600 transition">Tools</Link>

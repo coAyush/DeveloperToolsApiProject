@@ -116,10 +116,7 @@ const Navbar = () => {
                       <User size={16}/> Profile
                     </Link>
 
-                    <Link to="/settings" className="block px-4 py-2 hover:bg-gray-100 flex items-center gap-2">
-                      <Settings size={16}/> Settings
-                    </Link>
-
+              
                     <button
                       onClick={handleLogout}
                       className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2"
