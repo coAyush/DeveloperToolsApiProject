@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Copy, Loader2, RefreshCw } from "lucide-react";
 import axios from "axios";
-import toast from "react-hot-toast";  
+import toast from "react-hot-toast";
 const API_BASE = "http://localhost:8080/DeveloperToolsApiProject/api";
 
 const PasswordGen = () => {
@@ -34,6 +34,17 @@ const PasswordGen = () => {
 
       if (data?.password) {
         setPassword(data.password);
+
+        // Usage tracking
+        await fetch(
+          "http://localhost:8080/DeveloperToolsApiProject/api/usage/track?tool=Password Generator",
+          {
+            method: "POST",
+            credentials: "include",
+          }
+        );
+
+
         toast.success("✅ Password generated successfully!");
       } else {
         toast.error("No password returned from server.");
@@ -52,7 +63,7 @@ const PasswordGen = () => {
     toast.success("📋 Password copied to clipboard!");
   };
 
-  
+
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-cyan-50 px-6 py-20">
@@ -113,10 +124,9 @@ const PasswordGen = () => {
           onClick={handleGenerate}
           disabled={loading}
           className={`px-6 py-3 w-full rounded-lg font-semibold text-white shadow-md transition-all flex items-center justify-center gap-2
-            ${
-              !loading
-                ? "bg-gradient-to-r from-blue-600 to-cyan-400 hover:scale-105 hover:shadow-lg active:scale-95 cursor-pointer"
-                : "bg-gray-400 cursor-not-allowed"
+            ${!loading
+              ? "bg-gradient-to-r from-blue-600 to-cyan-400 hover:scale-105 hover:shadow-lg active:scale-95 cursor-pointer"
+              : "bg-gray-400 cursor-not-allowed"
             }`}
         >
           {loading ? <Loader2 className="animate-spin" size={18} /> : <RefreshCw size={18} />}

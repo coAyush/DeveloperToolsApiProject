@@ -39,10 +39,19 @@ export default function UuidGenerator() {
   const [count, setCount] = useState(1);
   const [version, setVersion] = useState("v4");
 
-  const generateUuids = () => {
+  const generateUuids = async () => {
     const gen = version === "v1" ? uuidV1 : uuidV4;
     const newUuids = Array.from({ length: count }, () => gen());
     setUuids(newUuids);
+
+    // Usage tracking
+    await fetch(
+      "http://localhost:8080/DeveloperToolsApiProject/api/usage/track?tool=UUID Generator",
+      {
+        method: "POST",
+        credentials: "include",
+      }
+    );
   };
 
   const copyUuids = async () => {
