@@ -66,12 +66,11 @@ const Footer = () => {
           {/* Contact */}
           <div className="flex flex-col space-y-2 text-sm">
             <h3 className="font-semibold text-gray-700">Contact</h3>
-            <button
-              onClick={() => setIsModalOpen(true)}
+            <Link to={'/contact'}   
               className="flex items-center gap-2 hover:text-blue-600 cursor-pointer transition"
             >
               <Mail size={16} /> devtoolbox@example.com
-            </button>
+            </Link>
             <div className="flex gap-4 mt-2">
               <a href="https://github.com" target="_blank" rel="noreferrer" className="hover:text-blue-600 transition">
                 <Github size={18} />
