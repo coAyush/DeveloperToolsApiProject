@@ -23,7 +23,7 @@ const Contact = () => {
     setLoading(true);
 
     try {
-      // ✅ ACTUAL API CALL (THIS WAS MISSING EARLIER)
+      //  ACTUAL API CALL (THIS WAS MISSING EARLIER)
       await axios.post(
         "http://localhost:8080/DeveloperToolsApiProject/api/contact",
         formData,
@@ -79,7 +79,7 @@ const Contact = () => {
           <div className="flex flex-col items-center">
             <Mail className="text-blue-500 mb-2" />
             <p className="text-gray-700 text-xs md:text-sm">
-              librarysystemxyz@gmail.com
+              developertools@gmail.com
             </p>
           </div>
           <div className="flex flex-col items-center">
