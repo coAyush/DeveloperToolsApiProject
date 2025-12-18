@@ -1,7 +1,11 @@
 // src/App.jsx
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import ChatWidget from "./components/ChatWidget";
+
 import Intro from "./pages/Intro";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
@@ -17,63 +21,128 @@ import ImagePlaceholder from "./pages/ImagePlaceholder";
 import Contact from "./pages/Contact";
 import About from "./pages/About";
 import ImageToPdf from "./pages/ImageToPdf";
-import ChatWidget from "./components/ChatWidget";
 import WordToPdf from "./pages/WordToPdf";
 import Redirector from "./pages/Redirector";
 
-// Public layout (without Navbar & Footer)
+const API_ME =
+  "http://localhost:8080/DeveloperToolsApiProject/api/auth/me";
+
+/* ---------- Layouts ---------- */
 const PublicLayout = ({ children }) => <>{children}</>;
 
-// Private layout (with Navbar & Footer)
-const PrivateLayout = ({ children }) => {
-  return (
-    <div className="flex flex-col min-h-screen bg-white text-gray-900">
-      <Navbar />
-      <main className="flex-grow">{children}</main>
-      <Footer />
-    </div>
-  );
+const PrivateLayout = ({ children }) => (
+  <div className="flex flex-col min-h-screen bg-white text-gray-900">
+    <Navbar />
+    <main className="flex-grow">{children}</main>
+    <Footer />
+  </div>
+);
+
+/* ---------- Simple Auth Guard ---------- */
+const RequireAuth = ({ children }) => {
+  const [loading, setLoading] = useState(true);
+  const [auth, setAuth] = useState(false);
+
+  useEffect(() => {
+    fetch(API_ME, { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => {
+        setAuth(data?.authenticated === true);
+        setLoading(false);
+      })
+      .catch(() => {
+        setAuth(false);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        Checking session...
+      </div>
+    );
+  }
+
+  if (!auth) return <Navigate to="/login" replace />;
+
+  return children;
 };
 
+/* ---------- Global Chat ---------- */
 function GlobalChat() {
   const { pathname } = useLocation();
-  const HIDE_ON = [
-    "/login",
-    "/signup",
-    "/",
-    "/forgot",
-    "/reset-password", // hide on forgot/reset too
-  ];
+  const HIDE_ON = ["/", "/login", "/signup", "/forgot", "/reset-password"];
   if (HIDE_ON.includes(pathname)) return null;
   return <ChatWidget />;
 }
 
+/* ---------- App ---------- */
 const App = () => {
   return (
     <>
       <Routes>
-        {/* Public pages */}
+        {/* PUBLIC */}
         <Route path="/" element={<PublicLayout><Intro /></PublicLayout>} />
         <Route path="/login" element={<PublicLayout><Login /></PublicLayout>} />
         <Route path="/signup" element={<PublicLayout><SignUp /></PublicLayout>} />
         <Route path="/forgot" element={<PublicLayout><ForgotPassword /></PublicLayout>} />
 
-        {/* Private pages (after login) */}
-        <Route path="/home" element={<PrivateLayout><Home /></PrivateLayout>} />
-        <Route path="/tools/word-to-pdf" element={<PrivateLayout><WordToPdf /></PrivateLayout>} />
-        <Route path="/tools/img-to-pdf" element={<PrivateLayout><ImageToPdf /></PrivateLayout>} />
-        <Route path="/tools/pdf-compressor" element={<PrivateLayout><PdfCompressor /></PrivateLayout>} />
-        <Route path="/about" element={<PrivateLayout><About /></PrivateLayout>} />
-        <Route path="/profile" element={<PrivateLayout><Profile/></PrivateLayout>} />
-        <Route path="/contact" element={<PrivateLayout><Contact /></PrivateLayout>} />
+        {/* PRIVATE */}
+        <Route
+          path="/home"
+          element={
+            <RequireAuth>
+              <PrivateLayout><Home /></PrivateLayout>
+            </RequireAuth>
+          }
+        />
 
-        {/* Tools */}
-        <Route path="/tools/qr" element={<PrivateLayout><QrTool /></PrivateLayout>} />
-        <Route path="/tools/url" element={<PrivateLayout><UrlShortener /></PrivateLayout>} />
-        <Route path="/tools/password" element={<PrivateLayout><PasswordGen /></PrivateLayout>} />
-        <Route path="/tools/uuid" element={<PrivateLayout><UuidGenerator /></PrivateLayout>} />
-        <Route path="/tools/placeholder" element={<PrivateLayout><ImagePlaceholder /></PrivateLayout>} />
-        <Route path="/r/:code" element={<PrivateLayout><Redirector /></PrivateLayout>} />
+        <Route
+          path="/profile"
+          element={
+            <RequireAuth>
+              <PrivateLayout><Profile /></PrivateLayout>
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/about"
+          element={
+            <RequireAuth>
+              <PrivateLayout><About /></PrivateLayout>
+            </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/contact"
+          element={
+            <RequireAuth>
+              <PrivateLayout><Contact /></PrivateLayout>
+            </RequireAuth>
+          }
+        />
+
+        {/* TOOLS */}
+        <Route path="/tools/qr" element={<RequireAuth><PrivateLayout><QrTool /></PrivateLayout></RequireAuth>} />
+        <Route path="/tools/url" element={<RequireAuth><PrivateLayout><UrlShortener /></PrivateLayout></RequireAuth>} />
+        <Route path="/tools/password" element={<RequireAuth><PrivateLayout><PasswordGen /></PrivateLayout></RequireAuth>} />
+        <Route path="/tools/uuid" element={<RequireAuth><PrivateLayout><UuidGenerator /></PrivateLayout></RequireAuth>} />
+        <Route path="/tools/placeholder" element={<RequireAuth><PrivateLayout><ImagePlaceholder /></PrivateLayout></RequireAuth>} />
+        <Route path="/tools/pdf-compressor" element={<RequireAuth><PrivateLayout><PdfCompressor /></PrivateLayout></RequireAuth>} />
+        <Route path="/tools/img-to-pdf" element={<RequireAuth><PrivateLayout><ImageToPdf /></PrivateLayout></RequireAuth>} />
+        <Route path="/tools/word-to-pdf" element={<RequireAuth><PrivateLayout><WordToPdf /></PrivateLayout></RequireAuth>} />
+
+        <Route
+          path="/r/:code"
+          element={
+            <RequireAuth>
+              <PrivateLayout><Redirector /></PrivateLayout>
+            </RequireAuth>
+          }
+        />
       </Routes>
 
       <GlobalChat />

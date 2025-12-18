@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { Mail, Phone, MapPin } from "lucide-react";
 import axios from "axios";
 
@@ -20,37 +20,26 @@ const Contact = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
+
     setLoading(true);
 
     try {
-      //  ACTUAL API CALL (THIS WAS MISSING EARLIER)
       await axios.post(
         "http://localhost:8080/DeveloperToolsApiProject/api/contact",
         formData,
         {
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
         }
       );
 
-      toast.success("Message sent successfully!", {
-        style: {
-          background: "#ffffff",
-          color: "#1e293b",
-          fontWeight: "bold",
-          borderRadius: "10px",
-          fontSize: "14px",
-          padding: "10px 16px",
-        },
-        iconTheme: {
-          primary: "#06b6d4",
-          secondary: "#fff",
-        },
-      });
+      toast.success("Message sent successfully!");
 
-      // ✅ RESET FORM
-      setFormData({ name: "", email: "", message: "" });
+      setFormData({
+        name: "",
+        email: "",
+        message: "",
+      });
     } catch (error) {
       console.error(error);
       toast.error("Failed to send message. Try again later!");
@@ -61,9 +50,6 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 via-blue-50 to-gray-100 px-6 pt-24 pb-16 flex justify-center">
-      <Toaster position="bottom-right" reverseOrder={false} />
-
-      {/* 🟦 Contact Card */}
       <div className="bg-white shadow-xl rounded-2xl p-8 md:p-10 max-w-xl w-full">
         {/* Heading */}
         <h1 className="text-3xl md:text-4xl font-extrabold text-center bg-gradient-to-r from-blue-600 to-cyan-400 bg-clip-text text-transparent mb-4">
@@ -126,9 +112,8 @@ const Contact = () => {
             onChange={handleChange}
             required
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
-          ></textarea>
+          />
 
-          {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}

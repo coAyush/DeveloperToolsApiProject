@@ -32,6 +32,7 @@ const WordToPdf = () => {
 
       const response = await axios.post(API_BASE, formData, {
         responseType: "blob",
+         withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
       });
 

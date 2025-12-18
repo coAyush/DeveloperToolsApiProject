@@ -28,6 +28,7 @@ const PdfCompressor = () => {
       setLoading(true);
       const response = await axios.post(`${API_BASE}/compress`, formData, {
         responseType: "blob",
+         withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
       });
 

@@ -33,6 +33,7 @@ const ImageToPdf = () => {
         formData,
         {
           responseType: "blob",
+           withCredentials: true,
           headers: { "Content-Type": "multipart/form-data" },
         }
       );

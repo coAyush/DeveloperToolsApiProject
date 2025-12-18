@@ -60,7 +60,6 @@ const Footer = () => {
             <Link to="/home" className="hover:text-blue-600 transition">Home</Link>
             <Link to="/about" className="hover:text-blue-600 transition">About</Link>
             <Link to="/contact" className="hover:text-blue-600 transition">Contact</Link>
-            <Link to="/tools" className="hover:text-blue-600 transition">Tools</Link>
           </div>
 
           {/* Contact */}

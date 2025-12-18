@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 
-// ✅ Correct final backend base URL (Confirmed working)
 const API_BASE = "http://localhost:8080/DeveloperToolsApiProject/api/auth";
 
 const Login = () => {
@@ -13,10 +12,9 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // 🔐 Auto session check
   useEffect(() => {
     fetch(`${API_BASE}/me`, {
-      credentials: "include", // Required so session cookie is included
+      credentials: "include",
     })
       .then((res) => res.json())
       .then((data) => {
@@ -28,16 +26,19 @@ const Login = () => {
       .catch(() => {});
   }, [navigate]);
 
-  const handleChange = (e) =>
+  const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    if (loading) return;
+
     setLoading(true);
 
     try {
       const { data } = await axios.post(`${API_BASE}/login`, form, {
-        withCredentials: true, // Required for JSESSIONID cookie
+        withCredentials: true,
       });
 
       if (data?.message === "Login successful!") {
@@ -47,8 +48,13 @@ const Login = () => {
         toast.error(data?.message || "Invalid credentials!");
       }
     } catch (err) {
-      toast.error("Server unreachable!");
-      console.error(err);
+      if (err.response?.data?.message) {
+        toast.error(err.response.data.message); // Wrong password / Email not registered
+      } else {
+        toast.error("Server unreachable!");
+      }
+
+      setForm((prev) => ({ ...prev, password: "" }));
     } finally {
       setLoading(false);
     }
@@ -100,15 +106,13 @@ const Login = () => {
             </div>
           </div>
 
-          {/* ⭐ Added Forgot Password Link */}
           <p className="text-right -mt-3">
-            <a
-              href="/forgot"
+            <Link
+              to="/forgot"
               className="text-blue-600 text-sm hover:underline"
-              
             >
               Forgot Password?
-            </a>
+            </Link>
           </p>
 
           <button
@@ -126,9 +130,9 @@ const Login = () => {
 
         <p className="mt-6 text-center text-sm text-gray-600">
           Don’t have an account?{" "}
-          <a href="/signup" className="text-blue-600 hover:underline">
+          <Link to="/signup" className="text-blue-600 hover:underline">
             Create one
-          </a>
+          </Link>
         </p>
       </div>
     </div>
